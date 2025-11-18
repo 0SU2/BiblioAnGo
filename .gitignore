@@ -1,0 +1,14 @@
+# Ignorando carpetas de vscode
+**/.vscode
+
+# Ignorando archivos "basura" de golang
+**/go.sum
+
+# Credenciales
+**/.env
+
+# Archivos de node
+**/node_modules
+**/package-lock.json
+
+# NOTA: De ser necesario, este archivo debe ser actualizado
