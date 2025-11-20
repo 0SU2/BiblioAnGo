@@ -1,40 +1,24 @@
 package main
 
 import (
-	"encoding/json"
+	"0SU2/biblioteca/internal/config"
 	"log"
-	"net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/cors"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-const PORT = "8080"
-
 func main() {
-	r := chi.NewRouter()
+	appConf, err := config.InitConfig()
 
-	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
+	if err != nil {
+		log.Fatalf("[ERROR] failed to init env file: %s\n", err.Error())
+	}
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		host := r.RemoteAddr
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(map[string]any{"success": true}); err != nil {
-			log.Fatalf("[ERROR] Check response in server: %s\n", err)
-		}
-		log.Printf("User %s request \\\n", host)
-	})
+	if err := config.StartDB(appConf); err != nil {
+		log.Fatalf("[ERROR] failed to init mysql: %s\n", err.Error())
+	}
 
-	log.Printf("[SUCCESS] Listeting in port %s\n", PORT)
-	if err := http.ListenAndServe(":"+PORT, r); err != nil {
-		log.Fatalf("[ERROR] Something happend with the server: %s\n", err)
+	if err := config.StartServe(appConf); err != nil {
+		log.Fatalf("[ERROR] failed to init server: %s\n", err.Error())
 	}
 }
