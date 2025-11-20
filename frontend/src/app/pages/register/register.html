@@ -1,0 +1,107 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+  <div class="bg-white shadow-xl rounded-xl p-8 w-full max-w-lg">
+
+    <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">
+      Crear cuenta
+    </h1>
+
+    <form (ngSubmit)="register()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- Nombre -->
+      <div class="col-span-2">
+        <label class="block text-sm font-medium mb-1">Nombre</label>
+        <input
+          type="text"
+          [(ngModel)]="form.nombre"
+          name="nombre"
+          required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+
+      <!-- Apellido paterno -->
+      <div>
+        <label class="block text-sm font-medium mb-1">Apellido paterno</label>
+        <input
+          type="text"
+          [(ngModel)]="form.apPaterno"
+          name="apPaterno"
+          required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+
+      <!-- Apellido materno -->
+      <div>
+        <label class="block text-sm font-medium mb-1">Apellido materno</label>
+        <input
+          type="text"
+          [(ngModel)]="form.apMaterno"
+          name="apMaterno"
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+
+      <!-- Ciudad -->
+      <div>
+        <label class="block text-sm font-medium mb-1">Ciudad</label>
+        <input
+          type="text"
+          [(ngModel)]="form.ciudad"
+          name="ciudad"
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+
+      <!-- País -->
+      <div>
+        <label class="block text-sm font-medium mb-1">País</label>
+        <input
+          type="text"
+          [(ngModel)]="form.pais"
+          name="pais"
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+
+      <!-- Usuario -->
+      <div class="col-span-2">
+        <label class="block text-sm font-medium mb-1">Usuario</label>
+        <input
+          type="text"
+          [(ngModel)]="form.usuario"
+          name="usuario"
+          required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+
+      <!-- Contraseña -->
+      <div class="col-span-2">
+        <label class="block text-sm font-medium mb-1">Contraseña</label>
+        <input
+          type="password"
+          [(ngModel)]="form.password"
+          name="password"
+          required
+          class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+      </div>
+
+      <!-- Botón -->
+      <button
+        class="col-span-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition"
+      >
+        Crear cuenta
+      </button>
+
+      <p class="col-span-2 text-center text-sm text-gray-600 mt-3">
+        ¿Ya tienes cuenta?
+        <a routerLink="/login" class="text-blue-600 hover:underline">
+          Inicia sesión aquí
+        </a>
+      </p>
+
+    </form>
+  </div>
+</div>

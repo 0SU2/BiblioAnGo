@@ -11,4 +11,7 @@
 **/node_modules
 **/package-lock.json
 
+# Archivos de Angular
+**/.angular
+
 # NOTA: De ser necesario, este archivo debe ser actualizado
