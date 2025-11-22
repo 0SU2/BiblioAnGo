@@ -1,0 +1,381 @@
+<div class="flex flex-col min-h-screen">
+
+  <app-header></app-header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <app-sidebar></app-sidebar>
+
+    <main class="flex-1 p-4 md:p-6 bg-gray-50 overflow-y-auto">
+
+      <section class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <button
+            (click)="selectCategory('infantil')"
+            class="relative h-32 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group cursor-pointer"
+          >
+            <div class="absolute inset-0 bg-linear-to-r from-pink-100 to-purple-100 group-hover:scale-105 transition-transform"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center relative z-10">
+                <svg class="w-12 h-12 mx-auto mb-2 text-purple-400 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="text-lg font-bold text-gray-800">Libros para niños</h3>
+              </div>
+            </div>
+          </button>
+
+          <button
+            (click)="selectCategory('juvenil')"
+            class="relative h-32 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group cursor-pointer"
+          >
+            <div class="absolute inset-0 bg-linear-to-r from-gray-200 to-gray-300 group-hover:scale-105 transition-transform"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center relative z-10">
+                <svg class="w-12 h-12 mx-auto mb-2 text-gray-500 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <h3 class="text-lg font-bold text-gray-800">Libros para jóvenes</h3>
+              </div>
+            </div>
+          </button>
+
+          <button
+            (click)="selectCategory('adulto')"
+            class="relative h-32 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group cursor-pointer"
+          >
+            <div class="absolute inset-0 bg-linear-to-r from-pink-100 to-amber-100 group-hover:scale-105 transition-transform"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center relative z-10">
+                <svg class="w-12 h-12 mx-auto mb-2 text-amber-400 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <h3 class="text-lg font-bold text-gray-800">Libros avanzados</h3>
+              </div>
+            </div>
+          </button>
+
+        </div>
+      </section>
+
+      <section class="mb-6">
+        <div class="flex gap-3">
+          <div class="flex-1 relative">
+            <input
+              type="text"
+              [(ngModel)]="searchQuery"
+              (input)="onSearch()"
+              placeholder="Buscar libro"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            />
+            <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </button>
+          </div>
+          <button
+            (click)="onAdvancedSearch()"
+            class="px-6 py-3 bg-red-900 text-white rounded-lg hover:bg-red-800 transition font-medium whitespace-nowrap flex items-center gap-2"
+          >
+            <span>Búsqueda avanzada</span>
+            <svg
+              class="w-5 h-5 transition-transform duration-300"
+              [class.rotate-180]="showFilters()"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      @if (showFilters()) {
+        <section class="mb-6 animate-slide-down">
+          <div class="bg-white rounded-xl shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold text-gray-800">Filtros avanzados</h3>
+              <button
+                (click)="clearFilters()"
+                class="text-sm text-red-900 hover:text-red-800 font-medium flex items-center gap-1"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Limpiar todo
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+          <div class="relative">
+            <select
+              [(ngModel)]="selectedDocType"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            >
+              <option value="">Tipo de documento</option>
+              @for (option of docTypes; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <div class="relative">
+            <select
+              [(ngModel)]="selectedAuthor"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            >
+              <option value="">Autor</option>
+              @for (option of authors; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <div class="relative">
+            <select
+              [(ngModel)]="selectedCategory"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            >
+              <option value="">Categoría</option>
+              @for (option of categories; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <div class="relative">
+            <select
+              [(ngModel)]="selectedSubject"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            >
+              <option value="">Materia</option>
+              @for (option of subjects; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <div class="relative">
+            <select
+              [(ngModel)]="selectedTag"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            >
+              <option value="">Etiqueta</option>
+              @for (option of tags; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <div class="relative">
+            <select
+              [(ngModel)]="selectedPublisher"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            >
+              <option value="">Editorial</option>
+              @for (option of publishers; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <div class="relative">
+            <select
+              [(ngModel)]="selectedYear"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            >
+              <option value="">Año de publicación</option>
+              @for (option of years; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <div class="relative">
+            <select
+              [(ngModel)]="selectedLanguage"
+              class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+            >
+              <option value="">Idioma</option>
+              @for (option of languages; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+
+        </div>
+          </div>
+        </section>
+      }
+
+      <section class="mb-6">
+        <div class="flex items-center justify-between">
+          <div class="text-gray-600">
+            <span class="font-semibold text-gray-800">{{ filteredBooks().length }}</span> resultados encontrados
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="flex bg-gray-200 rounded-lg p-1">
+              <button
+                (click)="viewMode.set('list')"
+                [class]="viewMode() === 'list' ? 'p-2 bg-white rounded-md shadow-sm transition' : 'p-2 text-gray-500 hover:text-gray-700 transition'"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              </button>
+              <button
+                (click)="viewMode.set('grid')"
+                [class]="viewMode() === 'grid' ? 'p-2 bg-white rounded-md shadow-sm transition' : 'p-2 text-gray-500 hover:text-gray-700 transition'"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      @if (viewMode() === 'grid') {
+        <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
+          @for (book of filteredBooks(); track book.id) {
+            <div
+              (click)="onBookClick(book.id)"
+              class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"
+            >
+              <div class="relative overflow-hidden">
+                <img [src]="book.image" class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="book.title">
+                @if (book.tag) {
+                  <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold"
+                       [class]="book.tag === 'Popular' ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white'">
+                    {{ book.tag }}
+                  </div>
+                }
+              </div>
+              <div class="p-3">
+                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm">{{ book.title }}</h3>
+                <p class="text-xs text-gray-500 mb-2">{{ book.author }}</p>
+                <div class="flex items-center gap-1 text-yellow-500 text-xs">
+                  <span>{{ getStars(book.rating) }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+      }
+
+      @if (viewMode() === 'list') {
+        <section class="space-y-4">
+          @for (book of filteredBooks(); track book.id) {
+            <div
+              (click)="onBookClick(book.id)"
+              class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer p-4 flex gap-4"
+            >
+              <div class="relative w-24 h-32 shrink-0">
+                <img [src]="book.image" class="w-full h-full object-cover rounded-lg" [alt]="book.title">
+                @if (book.tag) {
+                  <div class="absolute top-1 right-1 px-2 py-1 rounded-full text-xs font-bold"
+                       [class]="book.tag === 'Popular' ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white'">
+                    {{ book.tag }}
+                  </div>
+                }
+              </div>
+              <div class="flex-1">
+                <h3 class="font-bold text-gray-800 mb-1 text-base">{{ book.title }}</h3>
+                <p class="text-sm text-gray-500 mb-2">{{ book.author }}</p>
+                <div class="flex items-center gap-1 text-yellow-500 text-sm mb-2">
+                  <span>{{ getStars(book.rating) }}</span>
+                </div>
+                <div class="flex gap-2 text-xs text-gray-500">
+                  @if (book.year) {
+                    <span class="bg-gray-100 px-2 py-1 rounded">{{ book.year }}</span>
+                  }
+                  @if (book.category) {
+                    <span class="bg-gray-100 px-2 py-1 rounded capitalize">{{ book.category }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+      }
+
+      @if (filteredBooks().length === 0) {
+        <section class="text-center py-16">
+          <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">No se encontraron resultados</h3>
+          <p class="text-gray-500 mb-4">Intenta ajustar tus filtros o términos de búsqueda</p>
+          <button
+            (click)="clearFilters()"
+            class="bg-red-900 text-white px-6 py-2 rounded-full hover:bg-red-800 transition"
+          >
+            Limpiar filtros
+          </button>
+        </section>
+      }
+
+    </main>
+  </div>
+
+  <app-footer></app-footer>
+
+</div>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+</style>
