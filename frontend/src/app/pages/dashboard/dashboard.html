@@ -6,8 +6,8 @@
     <app-sidebar></app-sidebar>
     <main class="flex-1 p-4 md:p-6 bg-gray-50 overflow-y-auto">
 
-      <section class="bg-linear-to-r from-pink-50 via-white to-amber-50 rounded-2xl shadow-sm p-4 md:p-8 mb-6 md:mb-8 relative overflow-hidden">
-        <div class="hidden md:block absolute left-8 top-1/2 -translate-y-1/2 opacity-20">
+    <section class="bg-linear-to-r from-pink-50 via-white to-amber-50 rounded-2xl shadow-sm p-4 md:p-8 mb-6 md:mb-8 relative overflow-hidden">
+      <div class="hidden md:block absolute left-8 top-1/2 -translate-y-1/2 opacity-20">
           <svg class="w-32 h-32" viewBox="0 0 200 200" fill="none">
             <path d="M50 40 L50 160 L100 140 L150 160 L150 40 Z" fill="#8B1538" opacity="0.3"/>
             <rect x="60" y="50" width="80" height="3" fill="#8B1538"/>
@@ -37,15 +37,36 @@
             <div class="relative">
               <input
                 type="text"
-                placeholder="Buscar libro"
-                class="w-full px-4 md:px-6 py-3 md:py-4 rounded-full border border-gray-200 shadow-md focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent text-gray-700 text-sm md:text-base"
+                [(ngModel)]="searchQuery"
+                (input)="onSearch()"
+                placeholder="Buscar por título o autor..."
+                class="w-full px-4 md:px-6 py-3 md:py-4 pr-12 md:pr-14 rounded-full border border-gray-200 shadow-md focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent text-gray-700 text-sm md:text-base"
               />
-              <button class="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 bg-red-900 text-white p-2 md:p-3 rounded-full hover:bg-red-800 transition">
+              @if (searchQuery()) {
+                <button
+                  (click)="clearSearch()"
+                  class="absolute right-12 md:right-14 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition p-1"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              }
+              <button
+                (click)="onSearch()"
+                class="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 bg-red-900 text-white p-2 md:p-3 rounded-full hover:bg-red-800 transition"
+              >
                 <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
               </button>
             </div>
+
+            @if (searchQuery()) {
+              <div class="mt-3 text-sm text-gray-600">
+                {{ filteredBooks().length }} resultado(s) para "{{ searchQuery() }}"
+              </div>
+            }
           </div>
         </div>
       </section>
@@ -53,7 +74,16 @@
       <section class="mb-6 md:mb-8">
         <div class="relative">
           <div class="flex gap-2 md:gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <button class="px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0">
+            <button
+              (click)="onCategoryChange('all')"
+              [class]="selectedCategory() === 'all' ? 'px-4 md:px-5 py-2 bg-red-900 text-white rounded-full whitespace-nowrap hover:bg-red-800 transition font-medium text-sm md:text-base snap-start shrink-0' : 'px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0'"
+            >
+              Todos
+            </button>
+            <button
+              (click)="onCategoryChange('destacados')"
+              [class]="selectedCategory() === 'destacados' ? 'px-4 md:px-5 py-2 bg-red-900 text-white rounded-full whitespace-nowrap hover:bg-red-800 transition font-medium text-sm md:text-base snap-start shrink-0' : 'px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0'"
+            >
               Cuentos Infantiles
             </button>
             <button class="px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0">
@@ -78,246 +108,152 @@
         </div>
       </section>
 
-      <section class="mb-8 md:mb-10">
-        <div class="flex items-center justify-between mb-4 md:mb-5">
-          <h2 class="text-xl md:text-2xl font-bold text-gray-800">Libros Destacados</h2>
-          <button class="flex items-center gap-1 md:gap-2 text-red-900 font-semibold hover:text-red-800 transition group text-sm md:text-base">
-            Ver más
-            <svg class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-            </svg>
+      @if (filteredBooks().length === 0 && searchQuery()) {
+        <section class="text-center py-16">
+          <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">No se encontraron resultados</h3>
+          <p class="text-gray-500 mb-4">Intenta con otros términos de búsqueda</p>
+          <button
+            (click)="clearSearch()"
+            class="bg-red-900 text-white px-6 py-2 rounded-full hover:bg-red-800 transition"
+          >
+            Limpiar búsqueda
           </button>
-        </div>
+        </section>
+      }
 
-        <div class="relative group/section">
-          <button onclick="scrollBooks('destacados', 'left')" class="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 -translate-x-1/2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
+      @if (featuredBooks().length > 0) {
+        <section class="mb-8 md:mb-10">
+          <div class="flex items-center justify-between mb-4 md:mb-5">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800">
+              {{ searchQuery() ? 'Resultados de búsqueda' : 'Libros Destacados' }}
+            </h2>
+            <button class="flex items-center gap-1 md:gap-2 text-red-900 font-semibold hover:text-red-800 transition group text-sm md:text-base">
+              Ver más
+              <svg class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </button>
+          </div>
 
-          <button onclick="scrollBooks('destacados', 'right')" class="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 translate-x-1/2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
+          <div class="relative group/section">
+            <button onclick="scrollBooks('destacados', 'left')" class="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 -translate-x-1/2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
 
-          <div id="destacados" class="flex gap-3 md:gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/book1.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Más allá de las estrellas">
-                <div class="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
-                  Popular
-                </div>
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">Más allá de las estrellas</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">Neil Stenson</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★★</span>
-                </div>
-              </div>
-            </div>
+            <button onclick="scrollBooks('destacados', 'right')" class="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 translate-x-1/2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
 
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/book2.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Dino Rhymes">
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">Dino Rhymes</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">Illustrated Stories</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★☆</span>
-                </div>
-              </div>
-            </div>
+            <div id="destacados" class="flex gap-3 md:gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
 
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/book3.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Cada Historia Cuenta">
-                <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                  Nuevo
+              @for (book of featuredBooks(); track book.id) {
+                <div
+                  (click)="onBookClick(book.id)"
+                  class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0"
+                >
+                  <div class="relative overflow-hidden">
+                    <img [src]="book.image" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="book.title">
+                    @if (book.tag) {
+                      <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold"
+                           [class]="book.tag === 'Popular' ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white'">
+                        {{ book.tag }}
+                      </div>
+                    }
+                    <button
+                      (click)="onAddToFavorites(book.id, $event)"
+                      [class]="isFavorite(book.id) ? 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-red-600 p-2 rounded-full shadow-lg transition-all hover:scale-110' : 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-400 p-2 rounded-full shadow-lg transition-all hover:scale-110'"
+                    >
+                      <svg class="w-4 h-4" [attr.fill]="isFavorite(book.id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="p-3 md:p-4">
+                    <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">{{ book.title }}</h3>
+                    <p class="text-xs md:text-sm text-gray-500 mb-2">{{ book.author }}</p>
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
+                        <span>{{ getStars(book.rating) }}</span>
+                      </div>
+                      <button (click)="onRequestLoan(book.id, $event)" class="text-xs md:text-sm bg-red-900 text-white px-3 py-1 rounded-full hover:bg-red-800 transition">
+                        Leer
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">Cada Historia Cuenta</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">Editorial Norma</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★★</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/book4.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Argonauta">
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">Argonauta</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">Sci-Fi Adventure</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★★</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/book5.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Manuales">
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">Manuales Educativos</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">Colección</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★☆</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/book1.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Libro extra">
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">El Gran Libro</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">Varios Autores</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★★</span>
-                </div>
-              </div>
+              }
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      }
 
-      <section class="mb-8 md:mb-10">
-        <div class="flex items-center justify-between mb-4 md:mb-5">
-          <h2 class="text-xl md:text-2xl font-bold text-gray-800">Recomendados para ti</h2>
-          <button class="flex items-center gap-1 md:gap-2 text-red-900 font-semibold hover:text-red-800 transition group text-sm md:text-base">
-            Ver más
-            <svg class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-            </svg>
-          </button>
-        </div>
+      @if (recommendedBooks().length > 0 && !searchQuery()) {
+        <section class="mb-8 md:mb-10">
+          <div class="flex items-center justify-between mb-4 md:mb-5">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800">Recomendados para ti</h2>
+            <button class="flex items-center gap-1 md:gap-2 text-red-900 font-semibold hover:text-red-800 transition group text-sm md:text-base">
+              Ver más
+              <svg class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </button>
+          </div>
 
-        <div class="relative group/section">
-          <button onclick="scrollBooks('recomendados', 'left')" class="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 -translate-x-1/2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
+          <div class="relative group/section">
+            <button onclick="scrollBooks('recomendados', 'left')" class="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 -translate-x-1/2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
 
-          <button onclick="scrollBooks('recomendados', 'right')" class="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 translate-x-1/2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
+            <button onclick="scrollBooks('recomendados', 'right')" class="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 translate-x-1/2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
 
-          <div id="recomendados" class="flex gap-3 md:gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/rec1.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Libro recomendado">
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">El Hobbit</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">J.R.R. Tolkien</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★★</span>
+            <div id="recomendados" class="flex gap-3 md:gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              @for (book of recommendedBooks(); track book.id) {
+                <div
+                  (click)="onBookClick(book.id)"
+                  class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0"
+                >
+                  <div class="relative overflow-hidden">
+                    <img [src]="book.image" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="book.title">
+                    <button
+                      (click)="onAddToFavorites(book.id, $event)"
+                      [class]="isFavorite(book.id) ? 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-red-600 p-2 rounded-full shadow-lg transition-all hover:scale-110' : 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-400 p-2 rounded-full shadow-lg transition-all hover:scale-110'"
+                    >
+                      <svg class="w-4 h-4" [attr.fill]="isFavorite(book.id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="p-3 md:p-4">
+                    <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">{{ book.title }}</h3>
+                    <p class="text-xs md:text-sm text-gray-500 mb-2">{{ book.author }}</p>
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
+                        <span>{{ getStars(book.rating) }}</span>
+                      </div>
+                      <button (click)="onRequestLoan(book.id, $event)" class="text-xs md:text-sm bg-red-900 text-white px-3 py-1 rounded-full hover:bg-red-800 transition">
+                        Leer
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              }
             </div>
           </div>
-        </div>
-      </section>
-
-      <section class="mb-8 md:mb-10">
-        <div class="flex items-center justify-between mb-4 md:mb-5">
-          <h2 class="text-xl md:text-2xl font-bold text-gray-800">Novedades</h2>
-          <button class="flex items-center gap-1 md:gap-2 text-red-900 font-semibold hover:text-red-800 transition group text-sm md:text-base">
-            Ver más
-            <svg class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="relative group/section">
-          <button onclick="scrollBooks('novedades', 'left')" class="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 -translate-x-1/2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
-
-          <button onclick="scrollBooks('novedades', 'right')" class="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 translate-x-1/2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
-
-          <div id="novedades" class="flex gap-3 md:gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/new1.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Novedad">
-                <div class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                  Nuevo
-                </div>
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">Aventuras en el Bosque</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">María López</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★☆</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="mb-8 md:mb-10">
-        <div class="flex items-center justify-between mb-4 md:mb-5">
-          <h2 class="text-xl md:text-2xl font-bold text-gray-800">Los más prestados</h2>
-          <button class="flex items-center gap-1 md:gap-2 text-red-900 font-semibold hover:text-red-800 transition group text-sm md:text-base">
-            Ver más
-            <svg class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="relative group/section">
-          <button onclick="scrollBooks('prestados', 'left')" class="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 -translate-x-1/2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
-
-          <button onclick="scrollBooks('prestados', 'right')" class="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white text-red-900 p-3 rounded-full shadow-lg opacity-0 group-hover/section:opacity-100 transition-all duration-300 translate-x-1/2">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
-
-          <div id="prestados" class="flex gap-3 md:gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0">
-              <div class="relative overflow-hidden">
-                <img src="/assets/books/popular1.jpg" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" alt="Más prestado">
-                <div class="absolute top-2 left-2 bg-red-900 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  #1
-                </div>
-              </div>
-              <div class="p-3 md:p-4">
-                <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">Matar a un ruiseñor</h3>
-                <p class="text-xs md:text-sm text-gray-500 mb-2">Harper Lee</p>
-                <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                  <span>★★★★★</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      }
 
     </main>
 
@@ -327,17 +263,55 @@
 
 </div>
 
+@if (showLoginModal()) {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="closeModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 md:p-8 animate-fade-in" (click)="$event.stopPropagation()">
+      <div class="flex justify-center mb-4">
+        <div class="bg-red-100 rounded-full p-4">
+          <svg class="w-12 h-12 text-red-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+      </div>
+      <h3 class="text-xl md:text-2xl font-bold text-center text-gray-800 mb-3">
+        Inicia sesión
+      </h3>
+
+      <p class="text-center text-gray-600 mb-6">
+        {{ modalMessage() }}
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button
+          (click)="goToLogin()"
+          class="flex-1 bg-red-900 hover:bg-red-800 text-white font-semibold py-3 rounded-lg transition"
+        >
+          Iniciar sesión
+        </button>
+        <button
+          (click)="closeModal()"
+          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg transition"
+        >
+          Cancelar
+        </button>
+      </div>
+
+      <p class="text-center text-sm text-gray-600 mt-4">
+        ¿No tienes cuenta?
+        <a routerLink="/register" (click)="closeModal()" class="text-red-900 hover:underline font-semibold">
+          Regístrate aquí
+        </a>
+      </p>
+    </div>
+  </div>
+}
+
 <script>
-  /**
-   * Función para hacer scroll en la lista de libros.
-   * @param {string} id - El ID del contenedor de la lista de libros.
-   * @param {string} direction - 'left' para izquierda, 'right' para derecha.
-   */
   function scrollBooks(id, direction) {
     const container = document.getElementById(id);
     if (!container) return;
 
-    const scrollAmount = container.clientWidth * 0.8; // Desplaza 80% del ancho del contenedor
+    const scrollAmount = container.clientWidth * 0.8;
 
     if (direction === 'left') {
       container.scrollBy({
@@ -354,29 +328,44 @@
 </script>
 
 <style>
-.scrollbar-thin::-webkit-scrollbar {
-  height: 8px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #d1d5db; /* gray-300 */
-  border-radius: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background-color: #f3f4f6; /* gray-100 */
-  border-radius: 4px;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background-color: #f3f4f6;
+    border-radius: 4px;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
 </style>

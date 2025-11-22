@@ -1,26 +1,42 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { Auth } from '../../core/services/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
 })
 export class Login {
   usuario: string = '';
   password: string = '';
+  errorMessage: string = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private auth: Auth
+  ) {}
 
   login() {
-    console.log('Usuario:', this.usuario);
-    console.log('Contraseña:', this.password);
+    if (!this.usuario || !this.password) {
+      this.errorMessage = 'Por favor completa todos los campos';
+      return;
+    }
 
-    // Aquí luego llamas a AuthService
-    // this.auth.login(this.usuario, this.password)
+    const success = this.auth.login(this.usuario, this.password);
 
-    this.router.navigate(['/dashboard']);
+    if (success) {
+      const returnUrl = this.auth.getAndClearReturnUrl();
+
+      if (returnUrl) {
+        this.router.navigateByUrl(returnUrl);
+      } else {
+        this.router.navigate(['/dashboard']);
+      }
+    } else {
+      this.errorMessage = 'Usuario o contraseña incorrectos';
+    }
   }
 }
