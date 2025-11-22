@@ -175,7 +175,7 @@ export class Dashboard {
     event.stopPropagation();
 
     if (!this.auth.isLoggedIn()) {
-      this.showLoginRequired('solicitar para leer este libro');
+      this.showLoginRequired('leer este libro');
       return;
     }
 
