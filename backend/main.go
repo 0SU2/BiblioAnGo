@@ -8,17 +8,10 @@ import (
 )
 
 func main() {
-	appConf, err := config.InitConfig()
-
+	err := config.InitConfig()
 	if err != nil {
-		log.Fatalf("[ERROR] failed to init env file: %s\n", err.Error())
+		log.Fatalf("[ERROR] failed to init server configs. %s\n", err)
 	}
 
-	if err := config.StartDB(appConf); err != nil {
-		log.Fatalf("[ERROR] failed to init mysql: %s\n", err.Error())
-	}
-
-	if err := config.StartServe(appConf); err != nil {
-		log.Fatalf("[ERROR] failed to init server: %s\n", err.Error())
-	}
+	config.StartServe()
 }

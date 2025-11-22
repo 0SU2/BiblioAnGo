@@ -1,50 +1,50 @@
 package models
 
 type Usuario struct {
-	nua         string
-	nombre      string
-	apaterno    string
-	amaterno    string
-	ciudad      string
-	pais        string
-	creadoEn    string
-	usuario     string
-	contraseña  string
-	colecciones string
+	Nua         string
+	Nombre      string
+	Apaterno    string
+	Amaterno    string
+	Ciudad      string
+	Pais        string
+	CreadoEn    string
+	Usuario     string
+	Contraseña  string
+	Colecciones string
 }
 
 type Coleccion struct {
-	nua      string
-	isbn     string
-	creadoEn string
+	Nua      string
+	Isbn     string
+	CreadoEn string
 }
 
 type Libro struct {
-	isbn             string
-	titulo           string
-	fechaPublicacion string
-	editorial        string
-	disponiblidad    string
-	noEdicion        string
-	noPaginas        string
+	Isbn             string
+	Titulo           string
+	FechaPublicacion string
+	Editorial        string
+	Disponiblidad    string
+	NoEdicion        string
+	NoPaginas        string
 	Prologo          string
 }
 
 type Autor struct {
-	idAutor    string
-	nombre     string
-	apaterno   string
-	amaterno   string
-	ciudad     string
-	pais       string
-	fechaDeCum string
+	IdAutor    string
+	Nombre     string
+	Apaterno   string
+	Amaterno   string
+	Ciudad     string
+	Pais       string
+	FechaDeCum string
 }
 
 type Editorial struct {
-	idEditora string
-	nombre    string
-	direccion string
-	ciudad    string
-	pais      string
-	fundadoEn string
+	IdEditora string
+	Nombre    string
+	Direccion string
+	Ciudad    string
+	Pais      string
+	FundadoEn string
 }
