@@ -89,9 +89,18 @@ export class Dashboard {
     }
   ];
 
+  //Funcion normalizacion de acentos
+  private normalizeText(text:string): string {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
+
   // Libros filtrados por búsqueda y categoría
   filteredBooks = computed(() => {
-    const query = this.searchQuery().toLowerCase().trim();
+    const query = this.normalizeText(this.searchQuery());
     const category = this.selectedCategory();
 
     let books = this.allBooks;
@@ -104,8 +113,8 @@ export class Dashboard {
     // Filtrar por búsqueda
     if (query) {
       books = books.filter(book =>
-        book.title.toLowerCase().includes(query) ||
-        book.author.toLowerCase().includes(query)
+        this.normalizeText(book.title).includes(query) ||
+        this.normalizeText(book.author).includes(query)
       );
     }
 
