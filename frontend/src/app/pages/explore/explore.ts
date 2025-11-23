@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Header } from '../../shared/components/header/header';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
-import { Auth } from '../../core/services/auth'; // <-- AGREGADO: Servicio de autenticación
+import { Auth } from '../../core/services/auth';
 
 interface Book {
   id: number;
@@ -188,14 +188,24 @@ export class Explore {
     }
   ];
 
+  // Función para normalizar acentos
+  private normalizeText(text: string): string {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
+
   filteredBooks = computed(() => {
     let books = this.allBooks;
-    const query = this.searchQuery().toLowerCase().trim();
+    const query = this.normalizeText(this.searchQuery());
 
+    // Filtrar por búsqueda con normalización de acentos
     if (query) {
       books = books.filter(book =>
-        book.title.toLowerCase().includes(query) ||
-        book.author.toLowerCase().includes(query)
+        this.normalizeText(book.title).includes(query) ||
+        this.normalizeText(book.author).includes(query)
       );
     }
 
