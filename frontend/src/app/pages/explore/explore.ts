@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Header } from '../../shared/components/header/header';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
+import { Auth } from '../../core/services/auth'; // <-- AGREGADO: Servicio de autenticación
 
 interface Book {
   id: number;
@@ -39,10 +40,11 @@ interface FilterOption {
 })
 export class Explore {
   searchQuery = signal('');
-  viewMode = signal<'grid' | 'list'>('grid');
-  showFilters = signal(false); // La sección de filtros avanzados se ocultará por defecto
+  showFilters = signal(false);
+  favoriteBooks = signal<Set<number>>(new Set());
 
-  // Filtros
+  viewMode = signal<'grid' | 'list'>('grid');
+
   selectedDocType = signal('');
   selectedAuthor = signal('');
   selectedCategory = signal('');
@@ -52,7 +54,9 @@ export class Explore {
   selectedYear = signal('');
   selectedLanguage = signal('');
 
-  // Opciones para los filtros
+  showLoginModal = signal(false);
+  modalMessage = signal('');
+
   docTypes: FilterOption[] = [
     { value: '', label: 'Todos' },
     { value: 'libro', label: 'Libro' },
@@ -112,7 +116,6 @@ export class Explore {
     { value: 'fr', label: 'Francés' }
   ];
 
-  // Catálogo de libros
   allBooks: Book[] = [
     {
       id: 1,
@@ -185,12 +188,10 @@ export class Explore {
     }
   ];
 
-  // Libros filtrados
   filteredBooks = computed(() => {
     let books = this.allBooks;
     const query = this.searchQuery().toLowerCase().trim();
 
-    // Filtrar por búsqueda
     if (query) {
       books = books.filter(book =>
         book.title.toLowerCase().includes(query) ||
@@ -198,7 +199,6 @@ export class Explore {
       );
     }
 
-    // Aplicar filtros
     if (this.selectedCategory()) {
       books = books.filter(book => book.category === this.selectedCategory());
     }
@@ -218,7 +218,10 @@ export class Explore {
     return books;
   });
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    public auth: Auth
+  ) {}
 
   onSearch(): void {
     console.log('Buscando:', this.searchQuery());
@@ -229,7 +232,6 @@ export class Explore {
   }
 
   onAdvancedSearch(): void {
-    // MODIFICACIÓN CLAVE: Alternar la visibilidad de los filtros avanzados
     this.showFilters.update(currentValue => !currentValue);
     console.log('Filtros avanzados:', this.showFilters() ? 'Visible' : 'Oculto');
   }
@@ -260,5 +262,54 @@ export class Explore {
 
   selectCategory(category: string): void {
     this.selectedCategory.set(category);
+  }
+
+  onAddToFavorites(bookId: number, event: Event): void {
+    event.stopPropagation();
+
+    if (!this.auth.isLoggedIn()) {
+      this.showLoginRequired('agregar este libro a favoritos');
+      return;
+    }
+
+    const favorites = new Set(this.favoriteBooks());
+
+    if (favorites.has(bookId)) {
+      favorites.delete(bookId);
+    } else {
+      favorites.add(bookId);
+    }
+
+    this.favoriteBooks.set(favorites);
+  }
+
+  isFavorite(bookId: number): boolean {
+    return this.favoriteBooks().has(bookId);
+  }
+
+  onRequestLoan(bookId: number, event: Event): void {
+    event.stopPropagation();
+
+    if (!this.auth.isLoggedIn()) {
+      this.showLoginRequired('leer este libro');
+      return;
+    }
+
+    console.log('Solicitar préstamo:', bookId);
+    alert(`Préstamo del libro #${bookId} solicitado`);
+  }
+
+  private showLoginRequired(action: string): void {
+    this.modalMessage.set(`Necesitas iniciar sesión para ${action}`);
+    this.showLoginModal.set(true);
+  }
+
+  closeModal(): void {
+    this.showLoginModal.set(false);
+  }
+
+  goToLogin(): void {
+    this.closeModal();
+    this.router.navigate(['/login']);
   }
 }
