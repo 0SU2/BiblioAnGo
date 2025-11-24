@@ -37,17 +37,17 @@ type Libro struct {
 }
 
 type Autor struct {
-	Id_autor            string
+	ID_AUTOR            string
 	Nombre              string
 	Apaterno            string
-	Amaterno            string
+	Amaterno            any
 	Ciudad              string
 	Pais                string
 	Fecha_de_nacimiento string
 }
 
 type Editorial struct {
-	Id_editoria        string
+	ID_EDITORIA        string
 	Nombre             string
 	Direccion          string
 	Ciudad             string
