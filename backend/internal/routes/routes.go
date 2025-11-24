@@ -25,7 +25,7 @@ func DefineRoutes(handler *chi.Mux, biDatabase *sql.DB) {
 		host := r.RemoteAddr
 		routeReq := &r.URL
 		w.Header().Set("Content-Type", "application/json")
-		resultDB, err := service.AllUsers(biDatabase)
+		resultDB, err := service.AllBooks(biDatabase)
 		if err != nil {
 			log.Fatalf("[ERROR] Check response in server: %s\n", err.Error())
 		}

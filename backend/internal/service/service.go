@@ -6,7 +6,7 @@ import (
 	"database/sql"
 )
 
-func AllUsers(db *sql.DB) (*[]models.Libro, error) {
+func AllBooks(db *sql.DB) (*[]models.Libro, error) {
 	query, err := db.Query("SELECT * FROM libros;")
 	if err != nil {
 		return nil, err
