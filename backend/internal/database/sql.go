@@ -3,15 +3,15 @@ package database
 import (
 	"0SU2/biblioteca/internal/models"
 	"database/sql"
+
+	"github.com/blockloop/scan"
 )
 
-func GetAllUsers(query *sql.Rows) (*[]*models.Usuario, error) {
-	userQuery := []*models.Usuario{}
-	for query.Next() {
-		userTemp := &models.Usuario{}
-		query.Scan(&userTemp.Nua, &userTemp.Nombre)
-		userQuery = append(userQuery, userTemp)
+func GetBooks(query *sql.Rows) (*[]models.Libro, error) {
+	var bookQuery []models.Libro
+	err := scan.Rows(&bookQuery, query)
+	if err != nil {
+		return nil, err
 	}
-	return &userQuery, nil
-
+	return &bookQuery, nil
 }
