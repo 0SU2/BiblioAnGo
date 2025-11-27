@@ -3,6 +3,7 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Explore } from './pages/explore/explore';
+import { Community } from './pages/community/community';
 import { authGuard, guestGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
@@ -20,6 +21,11 @@ export const routes: Routes = [
   {
     path: 'explore',
     component: Explore
+  },
+
+  {
+    path: 'community',
+    component: Community
   },
 
   {
