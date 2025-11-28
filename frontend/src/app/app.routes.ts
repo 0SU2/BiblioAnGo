@@ -3,6 +3,8 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Explore } from './pages/explore/explore';
+import { Favorites } from './pages/favorites/favorites';
+import { AuthorProfileData } from './pages/author-profile/author-profile';
 import { authGuard, guestGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
@@ -20,6 +22,16 @@ export const routes: Routes = [
   {
     path: 'explore',
     component: Explore
+  },
+
+  {
+    path: 'favorites',
+    component: Favorites
+  },
+
+  {
+    path: 'author-profile/:id',
+    component: AuthorProfileData
   },
 
   {
