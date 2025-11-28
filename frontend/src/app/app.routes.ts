@@ -3,6 +3,7 @@ import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Explore } from './pages/explore/explore';
+import { Community } from './pages/community/community';
 import { Stories } from './pages/my-storys/my-storys';
 import { CreateStory } from './pages/create-story/create-story';
 import { CreateChapter } from './pages/create-chapter/create-chapter';
@@ -26,6 +27,8 @@ export const routes: Routes = [
   },
 
   {
+    path: 'community',
+    component: Community
     path: 'stories',
     component: Stories
   },
