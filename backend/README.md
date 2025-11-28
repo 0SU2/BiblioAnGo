@@ -2,4 +2,4 @@
 
 Para empezar el backend primero usar `go mod tidy`.
 
-Ya terminado el anterior comando, abrir una terminal aparte y usar `go mod run main.go`.
+Ya terminado el anterior comando, abrir una terminal aparte y usar `go run main.go`.

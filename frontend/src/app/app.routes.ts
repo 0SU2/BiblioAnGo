@@ -5,6 +5,7 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Explore } from './pages/explore/explore';
 import { Favorites } from './pages/favorites/favorites';
 import { AuthorProfileData } from './pages/author-profile/author-profile';
+import { Community } from './pages/community/community';
 import { Stories } from './pages/my-storys/my-storys';
 import { CreateStory } from './pages/create-story/create-story';
 import { CreateChapter } from './pages/create-chapter/create-chapter';
@@ -35,6 +36,8 @@ export const routes: Routes = [
   {
     path: 'author-profile/:id',
     component: AuthorProfileData
+    path: 'community',
+    component: Community
     path: 'stories',
     component: Stories
   },
