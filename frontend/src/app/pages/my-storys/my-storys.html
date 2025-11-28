@@ -1,0 +1,430 @@
+<div class="flex flex-col min-h-screen">
+
+  <app-header></app-header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <app-sidebar></app-sidebar>
+
+    <main class="flex-1 p-4 md:p-6 bg-gray-50 overflow-y-auto">
+
+      <!-- Estadísticas -->
+      <section class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <!-- Seguidores -->
+          <div class="bg-linear-to-br from-amber-50 to-amber-100 rounded-2xl p-6 shadow-md">
+            <div class="text-center">
+              <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-1">
+                {{ formatNumber(stats.followers) }}
+              </h2>
+              <p class="text-sm text-gray-600">Seguidores</p>
+            </div>
+          </div>
+
+          <!-- Siguiendo -->
+          <div class="bg-linear-to-br from-amber-50 to-amber-100 rounded-2xl p-6 shadow-md">
+            <div class="text-center">
+              <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-1">
+                {{ stats.following }}
+              </h2>
+              <p class="text-sm text-gray-600">Siguiendo</p>
+            </div>
+          </div>
+
+          <!-- Historias creadas -->
+          <div class="bg-linear-to-br from-amber-50 to-amber-100 rounded-2xl p-6 shadow-md">
+            <div class="text-center">
+              <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-1">
+                {{ stats.storiesCreated }}
+              </h2>
+              <p class="text-sm text-gray-600">Historias creadas</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Tabs y botón crear -->
+      <section class="mb-6">
+        <div class="flex items-center justify-between">
+
+          <!-- Tabs -->
+          <div class="flex gap-1 bg-white rounded-lg p-1 shadow-sm">
+            <button
+              (click)="selectTab('all')"
+              [class]="selectedTab() === 'all' ? 'px-6 py-2 rounded-md bg-red-900 text-white font-semibold transition' : 'px-6 py-2 rounded-md text-gray-600 hover:bg-gray-100 font-semibold transition'"
+            >
+              Todos
+            </button>
+            <button
+              (click)="selectTab('published')"
+              [class]="selectedTab() === 'published' ? 'px-6 py-2 rounded-md bg-red-900 text-white font-semibold transition' : 'px-6 py-2 rounded-md text-gray-600 hover:bg-gray-100 font-semibold transition'"
+            >
+              Publicados
+            </button>
+            <button
+              (click)="selectTab('drafts')"
+              [class]="selectedTab() === 'drafts' ? 'px-6 py-2 rounded-md bg-red-900 text-white font-semibold transition' : 'px-6 py-2 rounded-md text-gray-600 hover:bg-gray-100 font-semibold transition'"
+            >
+              Borradores
+            </button>
+          </div>
+
+          <!-- Botón crear historia -->
+          <button
+            (click)="onCreateStory()"
+            class="px-6 py-3 bg-red-900 text-white rounded-lg hover:bg-red-800 transition font-semibold flex items-center gap-2 shadow-md"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Crear Historia</span>
+          </button>
+
+        </div>
+      </section>
+
+      <!-- Lista de historias -->
+      <section class="space-y-4">
+        @for (story of filteredStories(); track story.id) {
+          <div
+            (click)="onStoryClick(story.id)"
+            class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group"
+          >
+            <div class="flex flex-col md:flex-row">
+
+              <!-- Drag handle -->
+              <div class="flex items-center justify-center p-4 md:p-6 text-gray-300 hover:text-gray-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              </div>
+
+              <!-- Imagen de portada -->
+              <div class="w-full md:w-32 h-48 md:h-auto overflow-hidden shrink-0">
+                <img
+                  [src]="story.coverImage"
+                  [alt]="story.title"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                >
+              </div>
+
+              <!-- Información de la historia -->
+              <div class="flex-1 p-4 md:p-6">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
+                  <div class="flex-1 mb-3 md:mb-0">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">{{ story.title }}</h3>
+                    <p class="text-sm text-gray-600 mb-1">{{ story.chapters }} capítulos</p>
+                    <p class="text-xs text-gray-500">Actualizado {{ story.lastUpdated }}</p>
+                  </div>
+
+                  <!-- Dropdown de seguir escribiendo -->
+                  <div class="flex items-center gap-2">
+                    <button
+                      (click)="onEditStory(story.id, $event)"
+                      class="px-4 py-2 bg-amber-100 text-gray-800 rounded-lg hover:bg-amber-200 transition font-medium flex items-center gap-2"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                      <span>Seguir escribiendo</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Estadísticas y acciones -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                  <!-- Estadísticas -->
+                  <div class="flex items-center gap-4 text-sm text-gray-600">
+                    <div class="flex items-center gap-1">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                      <span>{{ story.views }}</span>
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"/>
+                      </svg>
+                      <span>{{ story.likes }}</span>
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                      </svg>
+                      <span>{{ story.comments }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Botones de acción -->
+                  <div class="flex items-center gap-2">
+
+                    <!-- Donar/Monetizar -->
+                    <button
+                      (click)="onMonetizeStory(story.id, $event)"
+                      class="p-2 bg-amber-100 text-gray-700 rounded-lg hover:bg-amber-200 transition"
+                      title="Donar/Monetizar"
+                    >
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                      </svg>
+                    </button>
+
+                    <!-- Estadísticas -->
+                    <button
+                      (click)="onViewStats(story.id, $event)"
+                      class="p-2 bg-amber-100 text-gray-700 rounded-lg hover:bg-amber-200 transition"
+                      title="Ver estadísticas"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                      </svg>
+                    </button>
+
+                    <!-- Compartir -->
+                    <button
+                      (click)="onShareStory(story.id, $event)"
+                      class="p-2 bg-amber-100 text-gray-700 rounded-lg hover:bg-amber-200 transition"
+                      title="Compartir"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                      </svg>
+                    </button>
+
+                    <!-- Eliminar -->
+                    <button
+                      (click)="onDeleteStory(story.id, $event)"
+                      class="p-2 bg-amber-100 text-red-600 rounded-lg hover:bg-red-100 transition"
+                      title="Eliminar"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Estado vacío -->
+      @if (filteredStories().length === 0) {
+        <section class="text-center py-16">
+          <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">No tienes historias en esta categoría</h3>
+          <p class="text-gray-500 mb-4">Comienza a escribir tu primera historia</p>
+          <button
+            (click)="onCreateStory()"
+            class="bg-red-900 text-white px-6 py-3 rounded-full hover:bg-red-800 transition font-semibold"
+          >
+            Crear Historia
+          </button>
+        </section>
+      }
+
+    </main>
+  </div>
+
+  <app-footer></app-footer>
+
+</div>
+
+<!-- Modal de Monetización/Donaciones -->
+@if (showMonetizeModal()) {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="closeMonetizeModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 md:p-8 animate-fade-in" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-800">
+          Configurar ingresos
+        </h3>
+        <button
+          (click)="closeMonetizeModal()"
+          class="text-gray-400 hover:text-gray-600 transition"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Opciones de monetización -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+        <!-- Opción: Donaciones -->
+        <div
+          (click)="selectMonetizeOption('donate')"
+          [class]="selectedMonetizeOption() === 'donate' ? 'border-2 border-red-900 bg-red-50 rounded-xl p-6 cursor-pointer transition-all' : 'border-2 border-gray-200 bg-white rounded-xl p-6 cursor-pointer hover:border-gray-300 transition-all'"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </div>
+            @if (selectedMonetizeOption() === 'donate') {
+              <svg class="w-6 h-6 text-red-900" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            }
+          </div>
+          <h4 class="text-lg font-bold text-gray-800 mb-2">Recibir donaciones</h4>
+          <p class="text-sm text-gray-600 mb-4">
+            Tus lectores pueden apoyarte voluntariamente con donaciones mientras disfrutan de tu contenido gratis.
+          </p>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Contenido completamente gratis</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Mayor alcance de audiencia</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Crea comunidad leal</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Opción: Monetización -->
+        <div
+          (click)="selectMonetizeOption('monetize')"
+          [class]="selectedMonetizeOption() === 'monetize' ? 'border-2 border-red-900 bg-red-50 rounded-xl p-6 cursor-pointer transition-all' : 'border-2 border-gray-200 bg-white rounded-xl p-6 cursor-pointer hover:border-gray-300 transition-all'"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+              </svg>
+            </div>
+            @if (selectedMonetizeOption() === 'monetize') {
+              <svg class="w-6 h-6 text-red-900" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            }
+          </div>
+          <h4 class="text-lg font-bold text-gray-800 mb-2">Monetizar contenido</h4>
+          <p class="text-sm text-gray-600 mb-4">
+            Establece precios para capítulos premium o acceso exclusivo a tu historia completa.
+          </p>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Ingresos predecibles</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Controla tus precios</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Contenido exclusivo</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Información adicional según la opción -->
+      @if (selectedMonetizeOption() === 'donate') {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div class="flex gap-3">
+            <svg class="w-6 h-6 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+              <h5 class="font-semibold text-blue-900 mb-1">¿Cómo funcionan las donaciones?</h5>
+              <p class="text-sm text-blue-800">
+                Se agregará un botón de "Apoyar al autor" en tu historia. Los lectores podrán elegir el monto que deseen donar. Tú recibes el 85% de cada donación.
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (selectedMonetizeOption() === 'monetize') {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div class="flex gap-3">
+            <svg class="w-6 h-6 text-blue-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+              <h5 class="font-semibold text-blue-900 mb-1">¿Cómo funciona la monetización?</h5>
+              <p class="text-sm text-blue-800">
+                Puedes establecer capítulos gratuitos y premium. Decide el precio por capítulo o por acceso completo. Los primeros capítulos son siempre gratuitos para atraer lectores.
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Botones de acción -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button
+          (click)="onConfirmMonetize()"
+          class="flex-1 bg-red-900 hover:bg-red-800 text-white font-semibold py-3 rounded-lg transition"
+        >
+          Configurar {{ selectedMonetizeOption() === 'donate' ? 'donaciones' : 'monetización' }}
+        </button>
+        <button
+          (click)="closeMonetizeModal()"
+          class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg transition"
+        >
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
+</style>

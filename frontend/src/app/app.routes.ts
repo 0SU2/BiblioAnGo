@@ -5,6 +5,9 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Explore } from './pages/explore/explore';
 import { Favorites } from './pages/favorites/favorites';
 import { AuthorProfileData } from './pages/author-profile/author-profile';
+import { Stories } from './pages/my-storys/my-storys';
+import { CreateStory } from './pages/create-story/create-story';
+import { CreateChapter } from './pages/create-chapter/create-chapter';
 import { authGuard, guestGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
@@ -32,6 +35,18 @@ export const routes: Routes = [
   {
     path: 'author-profile/:id',
     component: AuthorProfileData
+    path: 'stories',
+    component: Stories
+  },
+
+  {
+    path: 'create-story',
+    component: CreateStory
+  },
+
+  {
+    path: 'create-chapter/:id',
+    component: CreateChapter
   },
 
   {
