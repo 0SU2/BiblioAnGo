@@ -1,0 +1,242 @@
+<div class="min-h-screen bg-gray-50 flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-6 py-4 shrink-0">
+    <div class="flex items-center justify-between max-w-7xl mx-auto">
+      <div class="flex items-center gap-4">
+        <button (click)="onBack()" class="text-gray-600 hover:text-gray-800">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <h1 class="text-xl font-semibold text-gray-800">"Tu historia comienza aquí."</h1>
+      </div>
+
+      <div class="flex gap-3">
+        <button
+          (click)="onPublish()"
+          class="px-6 py-2 bg-red-900 text-white rounded-lg hover:bg-red-800 transition font-medium"
+        >
+          Publicar
+        </button>
+        <button
+          (click)="onSaveDraft()"
+          class="px-6 py-2 bg-amber-100 text-gray-800 rounded-lg hover:bg-amber-200 transition font-medium"
+        >
+          Guardar
+        </button>
+        <button
+          (click)="onTogglePreview()"
+          class="px-6 py-2 bg-amber-100 text-gray-800 rounded-lg hover:bg-amber-200 transition font-medium"
+        >
+          {{ showPreview() ? 'Editar' : 'Vista previa' }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-hidden flex flex-col">
+    <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col px-6 py-6">
+
+      @if (!showPreview()) {
+        <!-- Modo Edición -->
+
+        <!-- Botones multimedia -->
+        <div class="flex gap-4 mb-6">
+          <button
+            (click)="onAddImage()"
+            class="flex-1 bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl p-6 hover:bg-amber-100 transition flex flex-col items-center justify-center gap-2 group"
+          >
+            <svg class="w-8 h-8 text-gray-600 group-hover:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span class="font-medium text-gray-700">Agregar imagen</span>
+          </button>
+
+          <button
+            (click)="onAddVideo()"
+            class="flex-1 bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl p-6 hover:bg-amber-100 transition flex flex-col items-center justify-center gap-2 group"
+          >
+            <svg class="w-8 h-8 text-gray-600 group-hover:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <span class="font-medium text-gray-700">Agregar video</span>
+          </button>
+        </div>
+
+        <!-- Editor -->
+        <div class="bg-white rounded-xl shadow-md flex-1 flex flex-col overflow-hidden">
+
+          <!-- Título del capítulo -->
+          <div class="border-b border-gray-200 p-6">
+            <input
+              type="text"
+              [(ngModel)]="chapterTitle"
+              class="w-full text-2xl font-bold text-gray-800 focus:outline-none"
+              placeholder="Título del capítulo"
+            >
+          </div>
+
+          <!-- Barra de herramientas -->
+          <div class="border-b border-gray-200 px-6 py-3 flex items-center gap-2 flex-wrap">
+
+            <!-- Formato de texto -->
+            <div class="flex items-center gap-1 border-r border-gray-300 pr-3">
+              <button
+                (click)="toggleBold()"
+                class="p-2 rounded hover:bg-gray-100 transition"
+                title="Negrita (Ctrl+B)"
+              >
+                <svg class="w-5 h-5 font-bold" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 25 25">
+                  <text x="6" y="18" font-family="Arial" font-weight="bold" font-size="16">B</text>
+                </svg>
+              </button>
+
+              <button
+                (click)="toggleItalic()"
+                class="p-2 rounded hover:bg-gray-100 transition"
+                title="Cursiva (Ctrl+I)"
+              >
+                <svg class="w-5 h-5 italic" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <text x="8" y="18" font-family="Arial" font-style="italic" font-size="16">I</text>
+                </svg>
+              </button>
+
+              <button
+                (click)="toggleUnderline()"
+                class="p-2 rounded hover:bg-gray-100 transition"
+                title="Subrayado (Ctrl+U)"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <text x="6" y="16" font-family="Arial" text-decoration="underline" font-size="16">U</text>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Insertar elementos -->
+            <div class="flex items-center gap-1 border-r border-gray-300 pr-3">
+              <button
+                (click)="insertLink()"
+                class="p-2 rounded hover:bg-gray-100 transition"
+                title="Insertar enlace"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                </svg>
+              </button>
+
+              <button
+                (click)="insertList()"
+                class="p-2 rounded hover:bg-gray-100 transition"
+                title="Lista"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              </button>
+
+              <button
+                (click)="insertQuote()"
+                class="p-2 rounded hover:bg-gray-100 transition"
+                title="Cita"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Alineación -->
+            <div class="flex items-center gap-1">
+              <button
+                (click)="setAlignment('left')"
+                [class]="currentAlignment() === 'left' ? 'p-2 rounded bg-gray-200 transition' : 'p-2 rounded hover:bg-gray-100 transition'"
+                title="Alinear izquierda"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"/>
+                </svg>
+              </button>
+
+              <button
+                (click)="setAlignment('center')"
+                [class]="currentAlignment() === 'center' ? 'p-2 rounded bg-gray-200 transition' : 'p-2 rounded hover:bg-gray-100 transition'"
+                title="Centrar"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M7 12h10M4 18h16"/>
+                </svg>
+              </button>
+
+              <button
+                (click)="setAlignment('right')"
+                [class]="currentAlignment() === 'right' ? 'p-2 rounded bg-gray-200 transition' : 'p-2 rounded hover:bg-gray-100 transition'"
+                title="Alinear derecha"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M14 12h6M4 18h16"/>
+                </svg>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Área de texto -->
+          <div class="flex-1 overflow-y-auto p-6">
+            <textarea
+              #contentTextarea
+              [(ngModel)]="chapterContent"
+              [style.text-align]="currentAlignment()"
+              class="w-full h-full min-h-[500px] text-gray-800 leading-relaxed text-lg focus:outline-none resize-none"
+              placeholder="Escribe tu historia aquí...
+
+Usa los formatos:
+**negrita** para negritas
+*cursiva* para cursiva
+__subrayado__ para subrayado
+[texto](url) para enlaces
+• para listas
+> para citas"
+            ></textarea>
+          </div>
+
+        </div>
+
+      } @else {
+        <!-- Modo Vista Previa -->
+
+        <div class="bg-white rounded-xl shadow-md flex-1 flex flex-col overflow-hidden">
+
+          <!-- Título del capítulo -->
+          <div class="border-b border-gray-200 p-6">
+            <h1 class="text-3xl font-bold text-gray-800">{{ chapterTitle() }}</h1>
+          </div>
+
+          <!-- Contenido renderizado -->
+          <div class="flex-1 overflow-y-auto p-8">
+            <div
+              class="prose prose-lg max-w-none text-gray-800 leading-relaxed"
+              [style.text-align]="currentAlignment()"
+              [innerHTML]="parseMarkdown(chapterContent())"
+            ></div>
+
+            @if (!chapterContent().trim()) {
+              <div class="text-center py-16">
+                <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p class="text-gray-500 text-lg">No hay contenido para previsualizar</p>
+                <p class="text-gray-400 text-sm mt-2">Escribe algo en el editor para ver la vista previa</p>
+              </div>
+            }
+          </div>
+
+        </div>
+
+      }
+
+    </div>
+  </main>
+
+</div>
