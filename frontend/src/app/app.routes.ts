@@ -36,8 +36,13 @@ export const routes: Routes = [
   {
     path: 'author-profile/:id',
     component: AuthorProfileData
+  },
+  {
     path: 'community',
     component: Community
+  },
+
+  {
     path: 'stories',
     component: Stories
   },
