@@ -15,7 +15,7 @@ CREATE TABLE usuarios (
     fecha_de_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     usuario VARCHAR(50) NOT NULL UNIQUE,
     contraseña VARCHAR(255) NOT NULL,
-    rol ENUM('admin', 'user') DEFAULT 'user',
+    rol ENUM('administrador', 'usuario') DEFAULT 'usuario',
     avatar TEXT(100) NOT NULL DEFAULT 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ficons.veryicon.com%2Fpng%2Fo%2Fmiscellaneous%2Fcommon-area-icons%2Fdefault-avatar-1.png&f=1&nofb=1&ipt=71e11e38dce31818f33eebb78301e2fbf8fd80f122a849d256f4c0e6715125fa',
     biografia TEXT(100),
     seguidores INT NOT NULL DEFAULT 0,
@@ -83,6 +83,7 @@ CREATE TABLE comunidades (
 CREATE TABLE publicacion (
     ID_PUBLICACION INT NOT NULL PRIMARY KEY UNIQUE,
     fecha_de_publicacion DATE NOT NULL,
+    estatus_publicacion SET('publicados', 'borradores') DEFAULT '',
     pub_nua INT UNSIGNED NOT NULL,
     pub_club INT NOT NULL,
     CONSTRAINT `fk_publicacion_nua`
@@ -124,8 +125,8 @@ CREATE TABLE favoritos (
         FOREIGN KEY (col_isbn) REFERENCES libros(ISBN)
 );
 
-CREATE TABLE compras (
-    ID_COMPRAS INT UNSIGNED NOT NULL PRIMARY KEY,
+CREATE TABLE prestamos (
+    ID_PRESTAMOS INT UNSIGNED NOT NULL PRIMARY KEY,
     fecha_de_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_de_entrega TIMESTAMP,
     estatus ENUM('activo', 'finalizado') DEFAULT 'activo',

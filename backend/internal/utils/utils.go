@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
+	"log"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -30,4 +33,28 @@ func GenerateToken(nua, usuario string) (string, error) {
 func HashPassword(pw string) (string, error) {
 	b, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
 	return string(b), err
+}
+
+func ParseToken(tokenStr string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(JwtString), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, jwt.ErrTokenInvalidClaims
+}
+
+func RespondJSON(w http.ResponseWriter, r *http.Request, code int, payload any) {
+	host := r.RemoteAddr
+	routeReq := &r.URL
+	log.Printf("User %s request %s\n", host, *routeReq)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		log.Fatalf("[ERROR] Check response in server: %s\n", err.Error())
+	}
 }

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"0SU2/biblioteca/internal/controller"
+	"0SU2/biblioteca/internal/middleware"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -19,6 +20,7 @@ func DefineRoutes(handler *chi.Mux, dbc *controller.DatabaseController, usc *con
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+	handler.Use(middleware.Logger)
 	handler.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		host := r.RemoteAddr
 		routeReq := &r.URL
@@ -29,6 +31,7 @@ func DefineRoutes(handler *chi.Mux, dbc *controller.DatabaseController, usc *con
 		}
 		log.Printf("User %s request %s\n", host, *routeReq)
 	})
+
 	handler.Route("/api", func(r chi.Router) {
 		r.Get("/allBooks", dbc.GetBooks)
 		r.Get("/allAutors", dbc.GetAllAutors)
@@ -37,6 +40,10 @@ func DefineRoutes(handler *chi.Mux, dbc *controller.DatabaseController, usc *con
 			r.Route("/auth", func(r chi.Router) {
 				r.Post("/register", usc.UserRegister)
 				r.Post("/login", usc.UserLogin)
+			})
+			r.Route("/data", func(r chi.Router) {
+				r.Use(middleware.Auth)
+				r.Get("/allUsers", dbc.GetAllUsersDB)
 			})
 		})
 	})
