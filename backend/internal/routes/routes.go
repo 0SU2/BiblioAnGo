@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func DefineRoutes(handler *chi.Mux, dbc *controller.DatabaseController) http.Handler {
+func DefineRoutes(handler *chi.Mux, dbc *controller.DatabaseController, usc *controller.UserController) http.Handler {
 	handler.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -34,16 +34,9 @@ func DefineRoutes(handler *chi.Mux, dbc *controller.DatabaseController) http.Han
 		r.Get("/allAutors", dbc.GetAllAutors)
 		r.Get("/allEditorial", dbc.GetAllEditorial)
 		r.Route("/user", func(r chi.Router) {
-			// r.Use() // TODO: Crear middleware con jwt
-			r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-				host := r.RemoteAddr
-				routeReq := &r.URL
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusOK)
-				if err := json.NewEncoder(w).Encode(map[string]any{"TODO": "Implementacion para usuarios"}); err != nil {
-					log.Fatalf("[ERROR] Check response in server: %s\n", err.Error())
-				}
-				log.Printf("User %s request %s\n", host, *routeReq)
+			r.Route("/auth", func(r chi.Router) {
+				r.Post("/register", usc.UserRegister)
+				r.Post("/login", usc.UserLogin)
 			})
 		})
 	})

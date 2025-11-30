@@ -1,6 +1,7 @@
 package config
 
 import (
+	"0SU2/biblioteca/internal/utils"
 	"database/sql"
 	"net/http"
 	"os"
@@ -10,18 +11,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type AppConfig struct {
+type AppStruct struct {
 	User_database     string
 	password_database string
 	name_database     string
 	Port              string
+	JWTSecret_string  string
 	Chi_conf          *chi.Mux
 	DB                *sql.DB
 	Handler           http.Handler
 }
 
-func InitConfig() (*AppConfig, error) {
-	temp := &AppConfig{User_database: "", password_database: "", name_database: "", Port: "", Chi_conf: nil, DB: nil}
+func NewConfig() (*AppStruct, error) {
+	temp := &AppStruct{User_database: "", password_database: "", name_database: "", Port: "", JWTSecret_string: "", Chi_conf: nil, DB: nil}
 	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
@@ -29,6 +31,7 @@ func InitConfig() (*AppConfig, error) {
 	temp.User_database = getEnv("USER_DATABASE", "")
 	temp.password_database = getEnv("PASSWORD_DATABASE", "")
 	temp.name_database = getEnv("NAME_DATABASE", "BiblioAnGo")
+	utils.JwtString = getEnv("JWT_SECRET", "")
 	temp.Port = getEnv("PORT", "8080")
 	temp.Chi_conf = chi.NewRouter()
 

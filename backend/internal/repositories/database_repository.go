@@ -16,7 +16,7 @@ type DatabaseRepository interface {
 
 type dbRepository struct{ dbRepo *sql.DB }
 
-func NewRepository(conf *config.AppConfig) DatabaseRepository {
+func NewRepository(conf *config.AppStruct) DatabaseRepository {
 	return &dbRepository{dbRepo: conf.DB}
 }
 
