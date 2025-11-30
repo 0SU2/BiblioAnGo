@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"0SU2/biblioteca/internal/utils"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -15,7 +14,6 @@ func Auth(next http.Handler) http.Handler {
 			return
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
-		log.Printf("[MIDDLEWARE] token %s", token)
 		_, err := utils.ParseToken(token)
 		if err != nil {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
