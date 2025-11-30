@@ -2,6 +2,7 @@ import { Component, signal, ViewChild, ElementRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { StoriesService } from '../../core/services/stories';
 
 @Component({
   selector: 'app-create-chapter',
@@ -22,7 +23,8 @@ export class CreateChapter {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private stories: StoriesService
   ) {
     this.storyId = this.route.snapshot.paramMap.get('id');
   }
@@ -64,33 +66,40 @@ export class CreateChapter {
     }
   }
 
-  onSaveDraft(): void {
-    console.log('Guardando borrador:', {
-      title: this.chapterTitle(),
-      content: this.chapterContent(),
-      storyId: this.storyId
-    });
-    alert('Borrador guardado exitosamente');
+  async onSaveDraft(): Promise<void> {
+    if (!this.storyId) {
+      alert('No se encontró la historia');
+      return;
+    }
+    try {
+      await this.stories.createChapter(Number(this.storyId), { titulo: this.chapterTitle(), contenido: this.chapterContent() });
+      alert('Borrador guardado exitosamente');
+    } catch (e) {
+      console.error('Error guardando borrador', e);
+      alert('No se pudo guardar el borrador');
+    }
   }
 
   onTogglePreview(): void {
     this.showPreview.update(v => !v);
   }
 
-  onPublish(): void {
+  async onPublish(): Promise<void> {
     if (!this.chapterContent().trim()) {
       alert('Por favor, escribe contenido para tu capítulo antes de publicar');
       return;
     }
-
-    if (confirm('¿Estás seguro de que deseas publicar este capítulo?')) {
-      console.log('Publicando capítulo:', {
-        title: this.chapterTitle(),
-        content: this.chapterContent(),
-        storyId: this.storyId
-      });
+    if (!this.storyId) {
+      alert('No se encontró la historia');
+      return;
+    }
+    try {
+      await this.stories.createChapter(Number(this.storyId), { titulo: this.chapterTitle(), contenido: this.chapterContent() });
       alert('¡Capítulo publicado exitosamente!');
       this.router.navigate(['/stories']);
+    } catch (e) {
+      console.error('Error publicando capítulo', e);
+      alert('No se pudo publicar el capítulo');
     }
   }
 

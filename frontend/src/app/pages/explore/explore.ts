@@ -6,9 +6,10 @@ import { Header } from '../../shared/components/header/header';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
 import { Auth } from '../../core/services/auth';
+import { Books, LibroDTO, AutorDTO, EditorialDTO } from '../../core/services/books';
 
 interface Book {
-  id: number;
+  id: string;
   title: string;
   author: string;
   image: string;
@@ -41,7 +42,7 @@ interface FilterOption {
 export class Explore {
   searchQuery = signal('');
   showFilters = signal(false);
-  favoriteBooks = signal<Set<number>>(new Set());
+  favoriteBooks = signal<Set<string>>(new Set());
 
   viewMode = signal<'grid' | 'list'>('grid');
 
@@ -64,19 +65,14 @@ export class Explore {
     { value: 'articulo', label: 'Artículo' }
   ];
 
+  // Se llenará dinámicamente desde backend
   authors: FilterOption[] = [
-    { value: '', label: 'Todos' },
-    { value: 'tolkien', label: 'J.R.R. Tolkien' },
-    { value: 'rowling', label: 'J.K. Rowling' },
-    { value: 'asimov', label: 'Isaac Asimov' }
+    { value: '', label: 'Todos' }
   ];
 
+  // Se llenará dinámicamente en base a los libros obtenidos
   categories: FilterOption[] = [
-    { value: '', label: 'Todas' },
-    { value: 'infantil', label: 'Infantil' },
-    { value: 'juvenil', label: 'Juvenil' },
-    { value: 'adulto', label: 'Adulto' },
-    { value: 'academico', label: 'Académico' }
+    { value: '', label: 'Todas' }
   ];
 
   subjects: FilterOption[] = [
@@ -94,11 +90,9 @@ export class Explore {
     { value: 'recomendado', label: 'Recomendado' }
   ];
 
+  // Se llenará dinámicamente desde backend
   publishers: FilterOption[] = [
-    { value: '', label: 'Todas' },
-    { value: 'norma', label: 'Editorial Norma' },
-    { value: 'planeta', label: 'Editorial Planeta' },
-    { value: 'santillana', label: 'Santillana' }
+    { value: '', label: 'Todas' }
   ];
 
   years: FilterOption[] = [
@@ -116,77 +110,7 @@ export class Explore {
     { value: 'fr', label: 'Francés' }
   ];
 
-  allBooks: Book[] = [
-    {
-      id: 1,
-      title: 'Jurisdicción y Arbitraje',
-      author: 'Marianella Ledesma Narváez',
-      image: '/assets/books/jurisdiccion.jpg',
-      rating: 5,
-      category: 'academico',
-      docType: 'libro',
-      publisher: 'Editorial Universidad',
-      year: 2023,
-      language: 'es'
-    },
-    {
-      id: 2,
-      title: 'Isra & El Dragón',
-      author: 'K.A. Gelan',
-      image: '/assets/books/isra-dragon.jpg',
-      rating: 4,
-      category: 'juvenil',
-      docType: 'libro',
-      year: 2024,
-      language: 'es',
-      tag: 'Nuevo'
-    },
-    {
-      id: 3,
-      title: 'Quintessence',
-      author: 'Jess Redman',
-      image: '/assets/books/quintessence.jpg',
-      rating: 5,
-      category: 'juvenil',
-      docType: 'libro',
-      year: 2023,
-      language: 'es',
-      tag: 'Popular'
-    },
-    {
-      id: 4,
-      title: 'Hablemos de Cine (Antología)',
-      author: 'Varios Autores',
-      image: '/assets/books/cine.jpg',
-      rating: 4,
-      category: 'adulto',
-      docType: 'libro',
-      year: 2022,
-      language: 'es'
-    },
-    {
-      id: 5,
-      title: 'Floating World',
-      author: 'Author Name',
-      image: '/assets/books/floating-world.jpg',
-      rating: 5,
-      category: 'adulto',
-      docType: 'libro',
-      year: 2024,
-      language: 'en'
-    },
-    {
-      id: 6,
-      title: 'Wingfeather Saga',
-      author: 'Andrew Peterson',
-      image: '/assets/books/wingfeather.jpg',
-      rating: 5,
-      category: 'juvenil',
-      docType: 'libro',
-      year: 2023,
-      language: 'es'
-    }
-  ];
+  allBooks: Book[] = [];
 
   // Función para normalizar acentos
   private normalizeText(text: string): string {
@@ -201,7 +125,7 @@ export class Explore {
     let books = this.allBooks;
     const query = this.normalizeText(this.searchQuery());
 
-    // Filtrar por búsqueda con normalización de acentos
+    // Búsqueda por texto
     if (query) {
       books = books.filter(book =>
         this.normalizeText(book.title).includes(query) ||
@@ -210,11 +134,11 @@ export class Explore {
     }
 
     if (this.selectedCategory()) {
-      books = books.filter(book => book.category === this.selectedCategory());
+      books = books.filter(book => this.normalizeText(book.category) === this.normalizeText(this.selectedCategory()));
     }
 
     if (this.selectedDocType()) {
-      books = books.filter(book => book.docType === this.selectedDocType());
+      books = books.filter(book => (book.docType || '') === this.selectedDocType());
     }
 
     if (this.selectedYear()) {
@@ -222,7 +146,15 @@ export class Explore {
     }
 
     if (this.selectedLanguage()) {
-      books = books.filter(book => book.language === this.selectedLanguage());
+      books = books.filter(book => (book.language || '') === this.selectedLanguage());
+    }
+
+    if (this.selectedAuthor()) {
+      books = books.filter(book => this.normalizeText(book.author) === this.normalizeText(this.selectedAuthor()));
+    }
+
+    if (this.selectedPublisher()) {
+      books = books.filter(book => this.normalizeText(book.publisher || '') === this.normalizeText(this.selectedPublisher()));
     }
 
     return books;
@@ -230,11 +162,90 @@ export class Explore {
 
   constructor(
     private router: Router,
-    public auth: Auth
+    public auth: Auth,
+    private booksService: Books
   ) {}
 
+  async ngOnInit() {
+    try {
+      const [libros, autores, editoriales] = await Promise.all([
+        this.booksService.getBooks(),
+        this.booksService.getAuthors(),
+        this.booksService.getEditorials(),
+      ]);
+
+      const authorMap = this.buildAuthorMap(autores);
+      const editorialMap = this.buildEditorialMap(editoriales);
+
+      this.allBooks = libros.map(l => this.mapLibroToBook(l, authorMap, editorialMap));
+
+      // Poblar categorías dinámicamente con las categorías presentes en los libros
+      const catSet = new Set<string>();
+      for (const l of libros) {
+        if (l.categoria) catSet.add(l.categoria);
+      }
+      this.categories = [
+        { value: '', label: 'Todas' },
+        ...Array.from(catSet).map(c => ({ value: this.normalizeText(c), label: c }))
+      ];
+
+      // Poblar autores y editoriales desde backend
+      const authorOptions = autores.map(a => this.authorName(a)).filter(Boolean);
+      this.authors = [
+        { value: '', label: 'Todos' },
+        ...authorOptions.map(name => ({ value: name, label: name }))
+      ];
+
+      const editorialOptions = editoriales.map(e => e.Nombre).filter(Boolean);
+      this.publishers = [
+        { value: '', label: 'Todas' },
+        ...editorialOptions.map(name => ({ value: name, label: name }))
+      ];
+    } catch (e) {
+      console.error('Error cargando datos de explorar', e);
+    }
+  }
+
+  private buildAuthorMap(autores: AutorDTO[]): Map<string, string> {
+    const map = new Map<string, string>();
+    for (const a of autores) {
+      const name = this.authorName(a);
+      map.set(a.id_autor, name);
+    }
+    return map;
+  }
+
+  private buildEditorialMap(editoriales: EditorialDTO[]): Map<string, string> {
+    const map = new Map<string, string>();
+    for (const e of editoriales) {
+      map.set(e.id_editoria, e.Nombre);
+    }
+    return map;
+  }
+
+  private authorName(a: AutorDTO): string {
+    const parts = [a.nombre, a.apaterno, a.amaterno || ''].filter(Boolean);
+    return parts.join(' ').trim();
+  }
+
+  private mapLibroToBook(l: LibroDTO, authorMap: Map<string, string>, editorialMap: Map<string, string>): Book {
+    return {
+      id: l.isbn,
+      title: l.titulo,
+      author: authorMap.get(l.autor_id) || '',
+      image: l.imagen,
+      rating: 0,
+      category: l.categoria || '',
+      docType: undefined,
+      publisher: editorialMap.get(l.editoria_id) || undefined,
+      year: l.fecha_de_publicacion ? new Date(l.fecha_de_publicacion).getFullYear() : undefined,
+      language: undefined,
+      tag: undefined,
+    };
+  }
+
   onSearch(): void {
-    console.log('Buscando:', this.searchQuery());
+    // No-op, el computed filtra automáticamente
   }
 
   clearSearch(): void {
@@ -243,7 +254,6 @@ export class Explore {
 
   onAdvancedSearch(): void {
     this.showFilters.update(currentValue => !currentValue);
-    console.log('Filtros avanzados:', this.showFilters() ? 'Visible' : 'Oculto');
   }
 
   toggleViewMode(): void {
@@ -261,7 +271,7 @@ export class Explore {
     this.selectedLanguage.set('');
   }
 
-  onBookClick(bookId: number): void {
+  onBookClick(bookId: string): void {
     console.log('Ver detalles del libro:', bookId);
     alert(`Ver detalles del libro #${bookId}`);
   }
@@ -274,7 +284,7 @@ export class Explore {
     this.selectedCategory.set(category);
   }
 
-  onAddToFavorites(bookId: number, event: Event): void {
+  onAddToFavorites(bookId: string, event: Event): void {
     event.stopPropagation();
 
     if (!this.auth.isLoggedIn()) {
@@ -293,11 +303,11 @@ export class Explore {
     this.favoriteBooks.set(favorites);
   }
 
-  isFavorite(bookId: number): boolean {
+  isFavorite(bookId: string): boolean {
     return this.favoriteBooks().has(bookId);
   }
 
-  onRequestLoan(bookId: number, event: Event): void {
+  onRequestLoan(bookId: string, event: Event): void {
     event.stopPropagation();
 
     if (!this.auth.isLoggedIn()) {

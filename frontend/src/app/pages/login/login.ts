@@ -19,13 +19,13 @@ export class Login {
     private auth: Auth
   ) {}
 
-  login() {
+  async login() {
     if (!this.usuario || !this.password) {
       this.errorMessage = 'Por favor completa todos los campos';
       return;
     }
 
-    const success = this.auth.login(this.usuario, this.password);
+    const success = await this.auth.login(this.usuario, this.password);
 
     if (success) {
       const returnUrl = this.auth.getAndClearReturnUrl();

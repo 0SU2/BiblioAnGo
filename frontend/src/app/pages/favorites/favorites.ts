@@ -1,18 +1,29 @@
 import { Component, signal, computed } from '@angular/core';
-import { Router } from '@angular/router'; // Importar Router
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Header } from '../../shared/components/header/header';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
+import { UserService, LoanDTO } from '../../core/services/user';
+import { AutorDTO, LibroDTO } from '../../core/services/books';
 
-interface Author {
-  id: number;
+interface AuthorVM {
+  id: string;
   name: string;
-  username: string;
-  avatar: string;
+  username?: string;
+  avatar?: string;
+  city?: string;
+  country?: string;
   stories: number;
   followers: number;
+}
+
+interface BookVM {
+  isbn: string;
+  title: string;
+  image: string;
+  category?: string;
 }
 
 @Component({
@@ -32,62 +43,15 @@ export class Favorites {
   selectedCategory = signal<'authors' | 'saved-books' | 'loans'>('authors');
 
   categories = [
-    { id: 'autores', label: 'Autores' },
+    { id: 'authors', label: 'Autores' },
     { id: 'saved-books', label: 'Libros guardados' },
-    { id: 'loans', label: 'Prestamos' }
+    { id: 'loans', label: 'Préstamos' }
   ];
 
-  // Mantengo todos los autores para simular la búsqueda y lista
-  allAuthors: Author[] = [
-    {
-      id: 1,
-      name: 'eVEm',
-      username: '@eVEm',
-      avatar: '/assets/authors/evem.jpg',
-      stories: 12,
-      followers: 454
-    },
-    {
-      id: 2,
-      name: 'vepiex4',
-      username: '@vepiex4',
-      avatar: '/assets/authors/vepiex4.jpg',
-      stories: 2,
-      followers: 30
-    },
-    {
-      id: 3,
-      name: 'M.J.',
-      username: '@Mj',
-      avatar: '/assets/authors/mj.jpg',
-      stories: 26,
-      followers: 640
-    },
-    {
-      id: 4,
-      name: 'Luna Morales',
-      username: '@LunaMorales',
-      avatar: '/assets/authors/luna.jpg',
-      stories: 8,
-      followers: 189
-    },
-    {
-      id: 5,
-      name: 'Carlos Vega',
-      username: '@CVega',
-      avatar: '/assets/authors/carlos.jpg',
-      stories: 15,
-      followers: 892
-    },
-    {
-      id: 6,
-      name: 'Ana Rivera',
-      username: '@AnaR',
-      avatar: '/assets/authors/ana.jpg',
-      stories: 34,
-      followers: 1205
-    }
-  ];
+  // Datos provenientes del backend
+  allAuthors = signal<AuthorVM[]>([]);
+  allSavedBooks = signal<BookVM[]>([]);
+  allLoans = signal<LoanDTO[]>([]);
 
   private normalizeText(text: string): string {
     return text
@@ -99,27 +63,77 @@ export class Favorites {
 
   filteredAuthors = computed(() => {
     const query = this.normalizeText(this.searchQuery());
-
-    if (!query) {
-      return this.allAuthors;
-    }
-
-    return this.allAuthors.filter(author =>
-      this.normalizeText(author.name).includes(query) ||
-      this.normalizeText(author.username).includes(query)
-    );
+    const items = this.allAuthors();
+    if (!query) return items;
+    return items.filter(a => this.normalizeText(a.name).includes(query));
   });
 
-  constructor(public router: Router) {}
+  filteredBooks = computed(() => {
+    const query = this.normalizeText(this.searchQuery());
+    const items = this.allSavedBooks();
+    if (!query) return items;
+    return items.filter(b => this.normalizeText(b.title).includes(query));
+  });
+
+  filteredLoans = computed(() => {
+    // En préstamos usualmente no se filtra por texto, pero se podría por título
+    const query = this.normalizeText(this.searchQuery());
+    const items = this.allLoans();
+    if (!query) return items;
+    return items.filter(l => this.normalizeText(l.titulo || '').includes(query));
+  });
+
+  constructor(public router: Router, private user: UserService) {}
+
+  async ngOnInit() {
+    await this.loadAll();
+  }
+
+  private async loadAll() {
+    try {
+      const [authors, savedBooks, loans] = await Promise.all([
+        this.user.getMyAuthors(),
+        this.user.getMyFavoriteBooks(),
+        this.user.getMyLoans()
+      ]);
+      this.allAuthors.set(authors.map(this.mapAutor));
+      this.allSavedBooks.set(savedBooks.map(this.mapLibro));
+      this.allLoans.set(loans);
+    } catch (e) {
+      console.error('Error cargando favoritos', e);
+    }
+  }
+
+  private mapAutor = (a: AutorDTO): AuthorVM => ({
+    id: a.id_autor,
+    name: [a.nombre, a.apaterno, a.amaterno || ''].filter(Boolean).join(' ').trim(),
+    username: '@' + [a.nombre, a.apaterno, a.amaterno || ''].filter(Boolean).join('').toLowerCase(),
+    avatar: undefined,
+    city: a.ciudad,
+    country: a.pais,
+    // --- TEMPORARY FIX: Assign placeholder values ---
+    stories: 0,
+    followers: 0,
+  });
+
+  private mapLibro = (l: LibroDTO): BookVM => ({
+    isbn: l.isbn,
+    title: l.titulo,
+    image: l.imagen,
+    category: l.categoria
+  });
 
   selectCategory(categoryId: string): void {
     this.selectedCategory.set(categoryId as any);
   }
 
-  // >>> CAMBIO CLAVE: Usar router.navigate para ir a la ruta /author-profile/:id
-  onAuthorClick(authorId: number): void {
-    console.log('Navegando al perfil del autor:', authorId);
+  onAuthorClick(authorId: string): void {
     this.router.navigate(['/author-profile', authorId]);
+  }
+
+  onBookClick(isbn: string): void {
+    // Navegar a detalles del libro si existe la ruta
+    console.log('Ver libro', isbn);
   }
 
   onSearch(): void {

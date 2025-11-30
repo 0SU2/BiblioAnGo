@@ -6,12 +6,13 @@ import { Header } from '../../shared/components/header/header';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
 import { Auth } from '../../core/services/auth';
+import { StoriesService, StoryDTO } from '../../core/services/stories';
 
 interface Story {
   id: number;
   title: string;
   chapters: number;
-  coverImage: string;
+  coverImage: string | null;
   lastUpdated: string;
   views: number;
   likes: number;
@@ -44,74 +45,7 @@ export class Stories {
     storiesCreated: 26
   };
 
-  allStories: Story[] = [
-    {
-      id: 1,
-      title: "Creator's Call",
-      chapters: 96,
-      coverImage: '/assets/stories/creators-call.jpg',
-      lastUpdated: 'Julio. 26, 2024 - 1:20 AM',
-      views: 1004,
-      likes: 456,
-      comments: 225,
-      status: 'published'
-    },
-    {
-      id: 2,
-      title: 'The Flight of the Darkstar Dragon',
-      chapters: 105,
-      coverImage: '/assets/stories/darkstar-dragon.jpg',
-      lastUpdated: 'Mar. 22, 2025 - 11:59 PM',
-      views: 5452,
-      likes: 453,
-      comments: 682,
-      status: 'published'
-    },
-    {
-      id: 3,
-      title: 'Shadows of Tomorrow',
-      chapters: 42,
-      coverImage: '/assets/stories/shadows.jpg',
-      lastUpdated: 'Nov. 15, 2024 - 3:45 PM',
-      views: 892,
-      likes: 234,
-      comments: 156,
-      status: 'published'
-    },
-    {
-      id: 4,
-      title: 'The Last Kingdom',
-      chapters: 8,
-      coverImage: '/assets/stories/kingdom.jpg',
-      lastUpdated: 'Ago. 10, 2024 - 9:30 PM',
-      views: 245,
-      likes: 67,
-      comments: 34,
-      status: 'draft'
-    },
-    {
-      id: 5,
-      title: 'Whispers in the Wind',
-      chapters: 67,
-      coverImage: '/assets/stories/whispers.jpg',
-      lastUpdated: 'Sep. 5, 2024 - 2:15 PM',
-      views: 3421,
-      likes: 789,
-      comments: 445,
-      status: 'published'
-    },
-    {
-      id: 6,
-      title: 'Chronicles of Eternity',
-      chapters: 15,
-      coverImage: '/assets/stories/chronicles.jpg',
-      lastUpdated: 'Oct. 20, 2024 - 8:00 AM',
-      views: 567,
-      likes: 123,
-      comments: 89,
-      status: 'draft'
-    }
-  ];
+  allStories: Story[] = [];
 
   filteredStories = computed(() => {
     const tab = this.selectedTab();
@@ -127,15 +61,40 @@ export class Stories {
 
   constructor(
     private router: Router,
-    public auth: Auth
+    public auth: Auth,
+    private stories: StoriesService
   ) {}
+
+  async ngOnInit() {
+    await this.loadStories();
+  }
+
+  private async loadStories() {
+    try {
+      const items: StoryDTO[] = await this.stories.getMyStories();
+      this.allStories = items.map(this.mapDtoToStory);
+    } catch (e) {
+      console.error('Error cargando historias', e);
+    }
+  }
+
+  private mapDtoToStory = (dto: StoryDTO): Story => ({
+    id: dto.id,
+    title: dto.titulo,
+    chapters: dto.capitulos ?? 0,
+    coverImage: dto.cover ?? null,
+    lastUpdated: dto.ultima_actualizacion,
+    views: dto.vistas ?? 0,
+    likes: dto.likes ?? 0,
+    comments: dto.comentarios ?? 0,
+    status: (dto.estatus === 'published' ? 'published' : 'draft')
+  });
 
   selectTab(tab: 'all' | 'published' | 'drafts'): void {
     this.selectedTab.set(tab);
   }
 
   onCreateStory(): void {
-    console.log('Crear nueva historia');
     this.router.navigate(['/create-story']);
   }
 
@@ -146,8 +105,7 @@ export class Stories {
 
   onEditStory(storyId: number, event: Event): void {
     event.stopPropagation();
-    console.log('Editar historia:', storyId);
-    this.router.navigate(['/editor', storyId]);
+    this.router.navigate(['/create-chapter', storyId]);
   }
 
   onMonetizeStory(storyId: number, event: Event): void {
@@ -168,13 +126,18 @@ export class Stories {
     alert(`Compartir historia #${storyId}`);
   }
 
-  onDeleteStory(storyId: number, event: Event): void {
+  async onDeleteStory(storyId: number, event: Event): Promise<void> {
     event.stopPropagation();
     const confirmed = confirm('¿Estás seguro de que deseas eliminar esta historia?');
 
     if (confirmed) {
-      console.log('Eliminar historia:', storyId);
-      alert(`Historia #${storyId} eliminada`);
+      try {
+        await this.stories.deleteStory(storyId);
+        await this.loadStories();
+      } catch (e) {
+        console.error('Error eliminando historia', e);
+        alert('No fue posible eliminar la historia');
+      }
     }
   }
 
