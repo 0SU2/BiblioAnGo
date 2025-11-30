@@ -13,16 +13,19 @@ import (
 )
 
 func main() {
-	appConfig, err := config.InitConfig()
+	appConfig, err := config.NewConfig()
 	if err != nil {
 		log.Fatalf("[ERROR] failed to init server configs. %s\n", err)
 	}
 
 	dbr := repositories.NewRepository(appConfig)
+	usr := repositories.NewUserRepository(appConfig)
 	dbs := service.NewDatabaseService(dbr)
+	uss := service.NewUserService(usr)
 	dbc := controller.NewDatabaseController(dbs)
+	usc := controller.NewUserController(uss)
 
-	handler := routes.DefineRoutes(appConfig.Chi_conf, dbc)
+	handler := routes.DefineRoutes(appConfig.Chi_conf, dbc, usc)
 
 	server := &http.Server{
 		Addr:    ":" + appConfig.Port,

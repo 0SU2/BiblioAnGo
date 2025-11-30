@@ -1,56 +1,82 @@
 package models
 
 type Usuario struct {
-	NUA               string
-	Nombre            string
-	Apaterno          string
-	Amaterno          string
-	Correo            string
-	Direccion         string
-	Ciudad            string
-	Estado            string
-	Pais              string
-	Telefono          string
-	Fecha_de_creacion string
-	Usuario           string
-	Contraseña        string
-	Rol               string
+	NUA               string `json:"nua"`
+	Nombre            string `json:"nombre"`
+	Apaterno          string `json:"apaterno"`
+	Amaterno          string `json:"amaterno"`
+	Correo            string `json:"correo"`
+	Direccion         string `json:"direccion"`
+	Ciudad            string `json:"ciudad"`
+	Estado            string `json:"estado"`
+	Pais              string `json:"pais"`
+	Telefono          string `json:"telefono"`
+	Fecha_de_creacion string `json:"fecha_de_creacion"`
+	Usuario           string `json:"usuario"`
+	Contraseña        string `json:"contraseña,omitempty"`
+	Rol               string `json:"rol"`
+	Avatar            string `json:"avatar"`
+	Biografia         string `json:"biografia"`
+	Facebook_link     string `json:"facebook_link"`
+	Instagram_link    string `json:"instagram_link"`
+	Twitter_link      string `json:"twitter_link"`
+}
+
+type TemplateUsuarioSQL struct {
+	Nombre         string `col:"nombre"`
+	Apaterno       string `col:"apaterno"`
+	Amaterno       string `col:"amaterno"`
+	Correo         string `col:"correo"`
+	Direccion      string `col:"direccion"`
+	Ciudad         string `col:"ciudad"`
+	Estado         string `col:"estado"`
+	Pais           string `col:"pais"`
+	Telefono       string `col:"telefono"`
+	Usuario        string `col:"usuario"`
+	Avatar         string `col:"avatar"`
+	Biografia      string `col:"biografia"`
+	Contraseña     string `col:"contraseña"`
+	Facebook_link  string `col:"facebook_link"`
+	Instagram_link string `col:"instagram_link"`
+	Twitter_link   string `col:"twitter_link"`
 }
 
 type Coleccion struct {
-	Id_col            string
-	Fecha_de_creacion string
-	Col_nua           string
-	Col_isbn          string
+	Id_col            string `json:"id_col"`
+	Fecha_de_creacion string `json:"fecha_de_creacion"`
+	Col_nua           string `json:"col_nua"`
+	Col_isbn          string `json:"col_isbn"`
 }
 
 type Libro struct {
-	ISBN                 string
-	Titulo               string
-	Fecha_de_publicacion string
-	Cantidad             int
-	No_edicion           string
-	No_paginas           string
-	Prologo              string
-	Autor_id             string
-	Editoria_id          string
+	ISBN                 string `json:"isbn"`
+	Titulo               string `json:"titulo"`
+	Fecha_de_publicacion string `json:"fecha_de_publicacion"`
+	Cantidad             int    `json:"cantidad"`
+	Categoria            string `json:"categoria"`
+	Imagen               string `json:"imagen"`
+	No_edicion           string `json:"no_edicion"`
+	No_paginas           string `json:"no_paginas"`
+	Prologo              string `json:"prologo"`
+	Autor_id             string `json:"autor_id"`
+	Editoria_id          string `json:"editoria_id"`
 }
 
 type Autor struct {
-	ID_AUTOR            string
-	Nombre              string
-	Apaterno            string
-	Amaterno            any
-	Ciudad              string
-	Pais                string
-	Fecha_de_nacimiento string
+	ID_AUTOR            string `json:"id_autor"`
+	Nombre              string `json:"nombre"`
+	Apaterno            string `json:"apaterno"`
+	Amaterno            any    `json:"amaterno"`
+	Ciudad              string `json:"ciudad"`
+	Pais                string `json:"pais"`
+	Fecha_de_nacimiento string `json:"fecha_de_nacimiento"`
 }
 
 type Editorial struct {
-	ID_EDITORIA        string
-	Nombre             string
-	Direccion          string
-	Ciudad             string
-	Pais               string
-	Fecha_de_fundacion string
+	ID_EDITORIA        string `json:"id_editoria"`
+	Nombre             string `json:"Nombre"`
+	Direccion          string `json:"direccion"`
+	Ciudad             string `json:"ciudad"`
+	Pais               string `json:"pais"`
+	Fecha_de_fundacion string `json:"fecha_de_fundacion"`
 }
