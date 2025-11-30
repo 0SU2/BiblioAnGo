@@ -24,7 +24,7 @@ func (s *userService) Login(username string, password string) (string, *models.U
 		return "", nil, errors.New("usuario no encontrado")
 	}
 
-	if bcrypt.CompareHashAndPassword([]byte(result.Contraseña), []byte(password)) != nil {
+	if bcrypt.CompareHashAndPassword([]byte(result.Contraseña), []byte(password)) == nil {
 		return "", nil, errors.New("contraseña incorrecta")
 	}
 

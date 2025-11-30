@@ -1,5 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import axios from 'axios';
+import { Api } from './api';
+
+interface AuthReponse {
+  status: boolean
+  message: string
+}
 
 const BASE_URL = 'http://localhost:8080';
 
@@ -9,11 +16,12 @@ const BASE_URL = 'http://localhost:8080';
 export class Auth {
   // Signal para saber si el usuario está autenticado
   isAuthenticated = signal<boolean>(false);
+  authResponse: AuthReponse = { status: false, message: ""}
 
   // Signal para datos del usuario
   currentUser = signal<any>(null);
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private api: Api) {
     // Verificar si hay sesión guardada al iniciar
     this.checkStoredSession();
   }
@@ -27,26 +35,28 @@ export class Auth {
     }
   }
 
-  async login(usuario: string, password: string): Promise<boolean> {
-    try {
-      const res = await fetch(`${BASE_URL}/api/user/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ Usuario: usuario, Password: password })
-      });
-      if (!res.ok) return false;
-      const data = await res.json();
-      if (!data?.token || !data?.user) return false;
-
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('currentUser', JSON.stringify(data.user));
-
-      this.currentUser.set(data.user);
-      this.isAuthenticated.set(true);
-      return true;
-    } catch (e) {
-      return false;
+  async login(usuario: string, password: string): Promise<AuthReponse> {
+    let problemResponse: any;
+    const { data, error } = await this.api.api.post('/user/auth/login', { usuario, password }).catch((problem:any):any => {
+      problemResponse = problem.response.data;
+      return problemResponse;
+    }).then((value):any => {
+      if(problemResponse) {
+        return { error: problemResponse};
+      }
+      return value;
+    })
+    if (error) {
+      this.authResponse.message = error;
+      this.authResponse.status = false;
+      return this.authResponse;
     }
+    localStorage.setItem('currentUser', JSON.stringify(data.user));
+     this.currentUser.set(data.user);
+    this.isAuthenticated.set(true);
+    this.authResponse.message = "";
+    this.authResponse.status = true;
+    return this.authResponse;
   }
 
   logout(): void {
