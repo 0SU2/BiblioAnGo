@@ -22,17 +22,12 @@ func NewUserRepository(conf *config.AppStruct) UserRepository {
 
 func (r *userRepository) GetByUsername(username string) (*models.Usuario, error) {
 	var temp models.Usuario
-	query, err := r.dbUser.Prepare("SELECT * FROM usuarios WHERE usuario = ?")
+	query, err := r.dbUser.Query("SELECT * FROM usuarios WHERE usuario = ?", username)
 	if err != nil {
 		return nil, err
 	}
 
-	queryResult, err := query.Query(username)
-	if err != nil {
-		return nil, err
-	}
-
-	err = scan.Row(&temp, queryResult)
+	err = scan.Row(&temp, query)
 	if err != nil {
 		return nil, err
 	}

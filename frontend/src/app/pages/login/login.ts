@@ -19,15 +19,15 @@ export class Login {
     private auth: Auth
   ) {}
 
-  login() {
+  async login() {
     if (!this.usuario || !this.password) {
       this.errorMessage = 'Por favor completa todos los campos';
       return;
     }
 
-    const success = this.auth.login(this.usuario, this.password);
+    const success = await this.auth.login(this.usuario, this.password);
 
-    if (success) {
+    if (success.status) {
       const returnUrl = this.auth.getAndClearReturnUrl();
 
       if (returnUrl) {
@@ -36,7 +36,7 @@ export class Login {
         this.router.navigate(['/dashboard']);
       }
     } else {
-      this.errorMessage = 'Usuario o contraseña incorrectos';
+      this.errorMessage = success.message
     }
   }
 }

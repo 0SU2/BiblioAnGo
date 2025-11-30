@@ -110,7 +110,7 @@ CREATE TABLE libros (
     editoria_id INT UNSIGNED NOT NULL,
     CONSTRAINT `fk_libro_editoria`
         FOREIGN KEY (editoria_id) REFERENCES editoriales(ID_EDITORIA),
-    CONSTRAINT `fk_libro_autor` 
+    CONSTRAINT `fk_libro_autor`
         FOREIGN KEY (autor_id) REFERENCES autores (ID_AUTOR)
 );
 
@@ -142,19 +142,19 @@ INSERT INTO usuarios(
     nombre,apaterno,amaterno,correo,direccion,ciudad,estado,pais,telefono,usuario, contraseña, rol
 ) VALUES (
     -- Admin
-    'Oscar', 'Rosas', 'Zavala', 'or@ugto.mx', 'Villas', 'Irapuato', 'Guanajuato', 'Mexico', '123456789', 'ren01', 
+    'Oscar', 'Rosas', 'Zavala', 'or@ugto.mx', 'Villas', 'Irapuato', 'Guanajuato', 'Mexico', '123456789', 'ren01',
     '123456789',  -- TODO: La contraseña es un ejemplo, pero esta va a ser encriptada en el siguiente ticket
-    'admin'
+    'administrador'
 ), (
     -- Usuario particular
-    'Oscar', 'Rosas', 'Zavala', 'ri@ugto.mx', 'Villas', 'Irapuato', 'Guanajuato', 'Mexico', '123456789', 'ren02', 
+    'Oscar', 'Rosas', 'Zavala', 'ri@ugto.mx', 'Villas', 'Irapuato', 'Guanajuato', 'Mexico', '123456789', 'ren02',
     '123456789',  -- TODO: La contraseña es un ejemplo, pero esta va a ser encriptada en el siguiente ticket
-    'user'
+    'usuario'
 );
 
-INSERT INTO autores 
-    (nombre,apaterno,amaterno,ciudad,pais,fecha_de_nacimiento, seguidores) 
-VALUES 
+INSERT INTO autores
+    (nombre,apaterno,amaterno,ciudad,pais,fecha_de_nacimiento, seguidores)
+VALUES
     ('Gabriel' , 'García' , 'Márquez' , 'Aracataca' , 'Colombia' , '1927-03-06 00:00:00', 102),
     ('Miguel' , 'de' , 'Cervantes' , 'Alcalá de Henares' , 'España' , '1547-09-29 00:00:00', 300),
     ('Jane' , 'Austen' , NULL , 'Steventon' , 'Reino Unido' , '1775-12-16 00:00:00', 100),
@@ -187,8 +187,8 @@ VALUES
     ('Diego','Rodríguez','García','San José','Costa Rica','1982-06-12 00:00:00',1);
 
 INSERT INTO editoriales
-    ( nombre,ciudad,direccion,pais,fecha_de_fundacion ) 
-VALUES 
+    ( nombre,ciudad,direccion,pais,fecha_de_fundacion )
+VALUES
     ('Penguin Random House' , 'Nueva York' , '1745 Broadway' , 'Estados Unidos' , '2013-07-01 00:00:00'),
     ('HarperCollins' , 'Nueva York' , '195 Broadway' , 'Estados Unidos' , '1989-01-01 00:00:00'),
     ('Hachette Livre' , 'París' , '43 Quai de Grenelle' , 'Francia' , '1826-01-01 00:00:00'),
@@ -222,8 +222,8 @@ VALUES
 
 
 INSERT INTO libros
-    (ISBN,titulo,fecha_de_publicacion,cantidad,imagen,categoria,calificacion,no_edicion,no_paginas,prologo,autor_id,editoria_id) 
-VALUES 
+    (ISBN,titulo,fecha_de_publicacion,cantidad,imagen,categoria,calificacion,no_edicion,no_paginas,prologo,autor_id,editoria_id)
+VALUES
     ('001A', 'Cien años de soledad', '1967-06-05 00:00:00', 10,'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fellector.com.pa%2Fcdn%2Fshop%2Ffiles%2Fcien-anos-de-soledad.webp%3Fv%3D1731690530%26width%3D1100&f=1&nofb=1&ipt=813d6e4a5fe789ef8a9532cccdcf2c5689cb7d0a67aabf96bd6c092cdcd027f2','Poesia', 3, '1', '417', 'Una saga familiar que muestra el realismo mágico en el pueblo ficticio de Macondo.', 1, 2),
     ('002A', 'Don Quijote de la Mancha', '1605-01-16 00:00:00', 2, 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.marcialpons.es%2Fmedia%2Fimg%2Fportadas%2F2023%2F4%2F18%2F9788408270881jfif&f=1&nofb=1&ipt=296903e218931f4c5faceda9d3c3d5763bffbddf0878d0944160155c04bc5fdf', 'Fantasia', 2, '1', '863', 'La historia de un hidalgo que busca revivir la caballería, enfrentándose a la locura y la realidad.', 2, 2),
     ('001B', 'Moby Dick', '1851-10-18 00:00:00', 3, 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.senscritique.com%2Fmedia%2F000019481669%2Fsource_big%2FMoby_Dick.jpg&f=1&nofb=1&ipt=bbcaedf85f5f942e139c91abda22e4c6e599d8171934a0edddc9e13f738381b5', 'Epica', 5, '1', '635', 'La obsesión del capitán Ahab por cazar a la gran ballena blanca.', 3, 4),

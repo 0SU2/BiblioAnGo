@@ -16,10 +16,10 @@ type Usuario struct {
 	Contraseña        string `json:"contraseña,omitempty"`
 	Rol               string `json:"rol"`
 	Avatar            string `json:"avatar"`
-	Biografia         string `json:"biografia"`
-	Facebook_link     string `json:"facebook_link"`
-	Instagram_link    string `json:"instagram_link"`
-	Twitter_link      string `json:"twitter_link"`
+	Biografia         any    `json:"biografia"`
+	Facebook_link     any    `json:"facebook_link"`
+	Instagram_link    any    `json:"instagram_link"`
+	Twitter_link      any    `json:"twitter_link"`
 }
 
 type TemplateUsuarioSQL struct {
