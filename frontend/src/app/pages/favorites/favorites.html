@@ -64,8 +64,8 @@
       </section>
 
       <!-- Contenido según categoría seleccionada -->
-      @if (selectedCategory() === 'narrators') {
-        <!-- Lista de Narradores -->
+      @if (selectedCategory() === 'authors') {
+        <!-- Lista de Autores -->
         <section class="space-y-4">
           @for (author of filteredAuthors(); track author.id) {
             <div
@@ -95,10 +95,6 @@
                     <div class="flex items-center gap-1">
                       <span class="font-semibold text-gray-800">{{ author.stories }}</span>
                       <span>Historias</span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                      <span class="font-semibold text-gray-800">{{ author.followedStories }}</span>
-                      <span>Historias seguidas</span>
                     </div>
                     <div class="flex items-center gap-1">
                       <span class="font-semibold text-gray-800">{{ author.followers }}</span>
@@ -134,23 +130,6 @@
         }
       }
 
-      @if (selectedCategory() === 'saved-stories') {
-        <!-- Historias guardadas -->
-        <section class="text-center py-16">
-          <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-          </svg>
-          <h3 class="text-xl font-semibold text-gray-700 mb-2">No tienes historias guardadas</h3>
-          <p class="text-gray-500 mb-4">Las historias que marques como favoritas aparecerán aquí</p>
-          <button
-            (click)="router.navigate(['/explore'])"
-            class="bg-red-900 text-white px-6 py-3 rounded-full hover:bg-red-800 transition font-semibold"
-          >
-            Explorar historias
-          </button>
-        </section>
-      }
-
       @if (selectedCategory() === 'saved-books') {
         <!-- Libros guardados -->
         <section class="text-center py-16">
@@ -168,14 +147,14 @@
         </section>
       }
 
-      @if (selectedCategory() === 'purchases') {
-        <!-- Compras -->
+      @if (selectedCategory() === 'loans') {
+        <!-- Prestamos -->
         <section class="text-center py-16">
           <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
-          <h3 class="text-xl font-semibold text-gray-700 mb-2">No tienes compras</h3>
-          <p class="text-gray-500 mb-4">Tus compras de contenido premium aparecerán aquí</p>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">No tienes Prestamos</h3>
+          <p class="text-gray-500 mb-4">Tus Prestamos</p>
           <button
             (click)="router.navigate(['/explore'])"
             class="bg-red-900 text-white px-6 py-3 rounded-full hover:bg-red-800 transition font-semibold"
