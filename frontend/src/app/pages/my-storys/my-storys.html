@@ -7,43 +7,6 @@
 
     <main class="flex-1 p-4 md:p-6 bg-gray-50 overflow-y-auto">
 
-      <!-- Estadísticas -->
-      <section class="mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-          <!-- Seguidores -->
-          <div class="bg-linear-to-br from-amber-50 to-amber-100 rounded-2xl p-6 shadow-md">
-            <div class="text-center">
-              <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-1">
-                {{ formatNumber(stats.followers) }}
-              </h2>
-              <p class="text-sm text-gray-600">Seguidores</p>
-            </div>
-          </div>
-
-          <!-- Siguiendo -->
-          <div class="bg-linear-to-br from-amber-50 to-amber-100 rounded-2xl p-6 shadow-md">
-            <div class="text-center">
-              <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-1">
-                {{ stats.following }}
-              </h2>
-              <p class="text-sm text-gray-600">Siguiendo</p>
-            </div>
-          </div>
-
-          <!-- Historias creadas -->
-          <div class="bg-linear-to-br from-amber-50 to-amber-100 rounded-2xl p-6 shadow-md">
-            <div class="text-center">
-              <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-1">
-                {{ stats.storiesCreated }}
-              </h2>
-              <p class="text-sm text-gray-600">Historias creadas</p>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
       <!-- Tabs y botón crear -->
       <section class="mb-6">
         <div class="flex items-center justify-between">

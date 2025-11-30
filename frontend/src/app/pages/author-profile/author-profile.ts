@@ -25,7 +25,6 @@ interface AuthorProfile {
   bio: string;
   followers: string;
   following: number;
-  followedStories: number;
   memberSince: string;
   socialLinks: {
     facebook?: string;
@@ -68,7 +67,6 @@ export class AuthorProfileData {
       bio: 'Explorando los límites del omniverso y el destino de diferentes protagonistas. Sus historias desafían la lógica, sumergiendo a los lectores en un viaje donde el conocimiento es poder... y condena.',
       followers: '2.2k',
       following: 252,
-      followedStories: 52,
       memberSince: 'Oct 21, 2024',
       socialLinks: {
         facebook: 'https://facebook.com/evem',
@@ -84,7 +82,6 @@ export class AuthorProfileData {
       bio: 'Aventuras intergalácticas y viajes en el tiempo. Buscando el significado de la existencia en los confines del cosmos.',
       followers: '5.8k',
       following: 105,
-      followedStories: 12,
       memberSince: 'Nov 10, 2023',
       socialLinks: {
         instagram: 'https://instagram.com/vepiex4'

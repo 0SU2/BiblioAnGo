@@ -12,7 +12,6 @@ interface Author {
   username: string;
   avatar: string;
   stories: number;
-  followedStories: number;
   followers: number;
 }
 
@@ -30,13 +29,12 @@ interface Author {
 })
 export class Favorites {
   searchQuery = signal('');
-  selectedCategory = signal<'narrators' | 'saved-stories' | 'saved-books' | 'purchases'>('narrators');
+  selectedCategory = signal<'authors' | 'saved-books' | 'loans'>('authors');
 
   categories = [
-    { id: 'narrators', label: 'Narradores' },
-    { id: 'saved-stories', label: 'Historias guardadas' },
+    { id: 'autores', label: 'Autores' },
     { id: 'saved-books', label: 'Libros guardados' },
-    { id: 'purchases', label: 'Compras' }
+    { id: 'loans', label: 'Prestamos' }
   ];
 
   // Mantengo todos los autores para simular la búsqueda y lista
@@ -47,7 +45,6 @@ export class Favorites {
       username: '@eVEm',
       avatar: '/assets/authors/evem.jpg',
       stories: 12,
-      followedStories: 45,
       followers: 454
     },
     {
@@ -56,7 +53,6 @@ export class Favorites {
       username: '@vepiex4',
       avatar: '/assets/authors/vepiex4.jpg',
       stories: 2,
-      followedStories: 35,
       followers: 30
     },
     {
@@ -65,7 +61,6 @@ export class Favorites {
       username: '@Mj',
       avatar: '/assets/authors/mj.jpg',
       stories: 26,
-      followedStories: 46,
       followers: 640
     },
     {
@@ -74,7 +69,6 @@ export class Favorites {
       username: '@LunaMorales',
       avatar: '/assets/authors/luna.jpg',
       stories: 8,
-      followedStories: 23,
       followers: 189
     },
     {
@@ -83,7 +77,6 @@ export class Favorites {
       username: '@CVega',
       avatar: '/assets/authors/carlos.jpg',
       stories: 15,
-      followedStories: 52,
       followers: 892
     },
     {
@@ -92,7 +85,6 @@ export class Favorites {
       username: '@AnaR',
       avatar: '/assets/authors/ana.jpg',
       stories: 34,
-      followedStories: 67,
       followers: 1205
     }
   ];
