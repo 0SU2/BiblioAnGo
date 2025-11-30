@@ -12,6 +12,7 @@ type DatabaseRepository interface {
 	AllBooks() (*[]models.Libro, error)
 	AllAutors() (*[]models.Autor, error)
 	AllEditorial() (*[]models.Editorial, error)
+	AllUsers() (*[]models.Editorial, error)
 }
 
 type dbRepository struct{ dbRepo *sql.DB }
@@ -52,6 +53,21 @@ func (r *dbRepository) AllAutors() (*[]models.Autor, error) {
 
 func (r *dbRepository) AllEditorial() (*[]models.Editorial, error) {
 	query, err := r.dbRepo.Query("SELECT * FROM editoriales;")
+	if err != nil {
+		return nil, err
+	}
+
+	var autorQuery []models.Editorial
+
+	err = scan.Rows(&autorQuery, query)
+	if err != nil {
+		return nil, err
+	}
+	return &autorQuery, nil
+}
+
+func (r *dbRepository) AllUsers() (*[]models.Editorial, error) {
+	query, err := r.dbRepo.Query("SELECT * FROM usuarios WHERE rol = 'usuario';")
 	if err != nil {
 		return nil, err
 	}

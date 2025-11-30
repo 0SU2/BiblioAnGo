@@ -80,3 +80,23 @@ type Editorial struct {
 	Pais               string `json:"pais"`
 	Fecha_de_fundacion string `json:"fecha_de_fundacion"`
 }
+
+type Clubs struct {
+	ID_CLUB      string `json:"id_club"`
+	Titulo       string `json:"titulo"`
+	Descripcion  string `json:"descripcion"`
+	Imagen       string `json:"imagen"`
+	Miembros     string `json:"miembros"`
+	Categoria    string `json:"categoria"`
+	Calificacion string `json:"calificacion"`
+	Tag          string `json:"tag"`
+}
+
+type Prestamos struct {
+	ID_PRESTAMO       string `json:"id_prestamo"`
+	Fecha_de_creacion string `json:"fecha_de_creacion"`
+	Fecha_de_entrega  string `json:"fecha_de_entrega"`
+	Estatus           string `json:"estatus"`
+	Pd_nua            string `json:"pd_nua"`
+	Pd_libro          string `json:"pd_libro"`
+}

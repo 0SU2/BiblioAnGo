@@ -9,6 +9,7 @@ type DatabaseService interface {
 	AllBooks() (*[]models.Libro, error)
 	AllAutors() (*[]models.Autor, error)
 	AllEditorial() (*[]models.Editorial, error)
+	AllUsersDB() (*[]models.Editorial, error)
 }
 
 type databaseService struct {
@@ -37,6 +38,14 @@ func (s *databaseService) AllAutors() (*[]models.Autor, error) {
 
 func (s *databaseService) AllEditorial() (*[]models.Editorial, error) {
 	response, err := s.repo.AllEditorial()
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (s *databaseService) AllUsersDB() (*[]models.Editorial, error) {
+	response, err := s.repo.AllUsers()
 	if err != nil {
 		return nil, err
 	}

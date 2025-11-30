@@ -3,9 +3,9 @@ package controller
 import (
 	"0SU2/biblioteca/internal/models"
 	"0SU2/biblioteca/internal/service"
+	"0SU2/biblioteca/internal/utils"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 )
 
@@ -28,15 +28,7 @@ func (userController *UserController) UserLogin(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	host := r.RemoteAddr
-	routeReq := &r.URL
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(map[string]any{"status": true, "token": token, "user": user}); err != nil {
-		log.Fatalf("[ERROR] Check response in server: %s\n", err.Error())
-	}
-	log.Printf("User %s request %s\n", host, *routeReq)
-
+	utils.RespondJSON(w, r, http.StatusOK, map[string]any{"status": true, "token": token, "user": user})
 }
 
 func (userController *UserController) UserRegister(w http.ResponseWriter, r *http.Request) {
@@ -58,13 +50,5 @@ func (userController *UserController) UserRegister(w http.ResponseWriter, r *htt
 		return
 	}
 
-	host := r.RemoteAddr
-	routeReq := &r.URL
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(map[string]any{"status": true, "data": result, "token": token}); err != nil {
-		log.Fatalf("[ERROR] Check response in server: %s\n", err.Error())
-	}
-	log.Printf("User %s request %s\n", host, *routeReq)
-
+	utils.RespondJSON(w, r, http.StatusOK, map[string]any{"status": true, "token": token, "data": result})
 }
