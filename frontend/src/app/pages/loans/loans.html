@@ -1,0 +1,353 @@
+<div class="flex flex-col min-h-screen">
+  <app-header></app-header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <app-sidebar></app-sidebar>
+
+    <main class="flex-1 p-4 md:p-6 bg-gray-50 overflow-y-auto">
+
+      <!-- Encabezado -->
+      <section class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">
+          {{ isAdmin() ? 'Administrar Préstamos' : 'Mis Préstamos' }}
+        </h1>
+        <p class="text-gray-600">
+          {{ isAdmin() ? 'Administra y autoriza todos los préstamos' : 'Gestiona tus libros prestados' }}
+        </p>
+      </section>
+
+      <!-- Solo mostrar para administradores: Panel de gestión -->
+      @if (isAdmin()) {
+        <section class="mb-8 p-6 bg-white rounded-xl shadow-md border border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Panel de Administración</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <!-- Estadísticas -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-gray-500 text-sm">Total Préstamos</p>
+              <p class="text-2xl font-bold text-gray-800">{{ allLoans().length }}</p>
+            </div>
+
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <p class="text-blue-500 text-sm">Pendientes</p>
+              <p class="text-2xl font-bold text-blue-800">{{ pendingLoans().length }}</p>
+            </div>
+
+            <div class="bg-green-50 p-4 rounded-lg">
+              <p class="text-green-500 text-sm">Activos</p>
+              <p class="text-2xl font-bold text-green-800">{{ activeLoans().length }}</p>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <p class="text-gray-500 text-sm">Finalizados</p>
+              <p class="text-2xl font-bold text-gray-800">{{ finishedLoans().length }}</p>
+            </div>
+          </div>
+
+          <!-- Botones de acción para admin -->
+          <div class="flex flex-wrap gap-3">
+            <button
+              (click)="exportLoans()"
+              class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition flex items-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Exportar
+            </button>
+
+            <button
+              (click)="showPendingOnly = !showPendingOnly"
+              [class]="showPendingOnly ?
+                'px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition' :
+                'px-4 py-2 border border-yellow-500 text-yellow-500 rounded-lg hover:bg-yellow-50 transition'"
+            >
+              {{ showPendingOnly ? 'Mostrar Todos' : 'Solo Pendientes' }}
+            </button>
+          </div>
+        </section>
+      }
+
+      <!-- Filtros de estado -->
+      <section class="mb-6">
+        <div class="flex flex-wrap gap-3">
+          <button
+            (click)="selectStatus('all')"
+            [class]="selectedStatus() === 'all' ?
+              'px-6 py-2 rounded-full bg-red-900 text-white font-medium transition' :
+              'px-6 py-2 rounded-full bg-white text-gray-700 border border-gray-300 hover:border-red-900 font-medium transition'"
+          >
+            Todos ({{ allLoans().length }})
+          </button>
+          @if (isAdmin()) {
+            <button
+              (click)="selectStatus('pendiente')"
+              [class]="selectedStatus() === 'pendiente' ?
+                'px-6 py-2 rounded-full bg-yellow-500 text-white font-medium transition' :
+                'px-6 py-2 rounded-full bg-white text-gray-700 border border-gray-300 hover:border-yellow-500 font-medium transition'"
+            >
+              Pendientes ({{ pendingLoans().length }})
+            </button>
+          }
+          <button
+            (click)="selectStatus('activo')"
+            [class]="selectedStatus() === 'activo' ?
+              'px-6 py-2 rounded-full bg-blue-500 text-white font-medium transition' :
+              'px-6 py-2 rounded-full bg-white text-gray-700 border border-gray-300 hover:border-blue-500 font-medium transition'"
+          >
+            Activos ({{ activeLoans().length }})
+          </button>
+          <button
+            (click)="selectStatus('finalizado')"
+            [class]="selectedStatus() === 'finalizado' ?
+              'px-6 py-2 rounded-full bg-gray-500 text-white font-medium transition' :
+              'px-6 py-2 rounded-full bg-white text-gray-700 border border-gray-300 hover:border-gray-500 font-medium transition'"
+          >
+            Finalizados ({{ finishedLoans().length }})
+          </button>
+        </div>
+      </section>
+
+      <!-- Buscador -->
+      <section class="mb-6">
+        <div class="relative max-w-2xl">
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            (input)="onSearch()"
+            [placeholder]="isAdmin() ? 'Buscar por libro, usuario, email...' : 'Buscar préstamos...'"
+            class="w-full px-4 py-3 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent"
+          />
+          <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Tabla para administradores -->
+      @if (isAdmin() && filteredLoans().length > 0) {
+        <section class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Libro</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Préstamo</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Entrega</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estatus</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                @for (loan of filteredLoans(); track loan.id) {
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        @if (loan.usuario_avatar) {
+                          <img class="h-10 w-10 rounded-full" [src]="loan.usuario_avatar" alt="">
+                        }
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-gray-900">
+                            {{ loan.usuario_nombre }} {{ loan.usuario_apaterno }}
+                          </div>
+                          <div class="text-sm text-gray-500">{{ loan.usuario_telefono || 'Sin teléfono' }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {{ loan.usuario_correo }}
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <img class="h-12 w-9 object-cover rounded shadow mr-3" [src]="loan.imagen" alt="">
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">{{ loan.titulo }}</div>
+                          <div class="text-xs text-gray-500">ISBN: {{ loan.isbn }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ formatDate(loan.fecha_creacion) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                      @if (loan.fecha_entrega) {
+                        <span class="text-gray-900">{{ formatDate(loan.fecha_entrega) }}</span>
+                      } @else {
+                        <span class="text-yellow-600 font-medium">Sin asignar</span>
+                      }
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      @if (loan.estatus === 'pendiente') {
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendiente</span>
+                      } @else if (loan.estatus === 'activo') {
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                      } @else {
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Finalizado</span>
+                      }
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      @if (loan.estatus === 'pendiente') {
+                        <div class="flex gap-2">
+                          <button
+                            (click)="approveLoan(loan.id)"
+                            class="text-green-600 hover:text-green-900 hover:bg-green-50 px-3 py-1 rounded"
+                          >
+                            Autorizar
+                          </button>
+                          <button
+                            (click)="rejectLoan(loan.id)"
+                            class="text-red-600 hover:text-red-900 hover:bg-red-50 px-3 py-1 rounded"
+                          >
+                            Rechazar
+                          </button>
+                        </div>
+                      } @else if (loan.estatus === 'activo') {
+                        <button
+                          (click)="markAsReturned(loan.id)"
+                          class="text-blue-600 hover:text-blue-900 hover:bg-blue-50 px-3 py-1 rounded"
+                        >
+                          Marcar Devuelto
+                        </button>
+                      } @else {
+                        <button
+                          (click)="viewDetails(loan.id)"
+                          class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-1 rounded"
+                        >
+                          Ver Detalles
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+
+      <!-- Tarjetas para usuarios normales -->
+      @else if (!isAdmin() && filteredLoans().length > 0) {
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Código existente para usuarios normales -->
+          @for (loan of filteredLoans(); track loan.id) {
+            <div
+              (click)="onLoanClick(loan.isbn)"
+              class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group"
+            >
+              <div class="relative h-64 bg-gray-100 overflow-hidden">
+                <img
+                  [src]="loan.imagen"
+                  [alt]="loan.titulo"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                >
+                <div class="absolute top-3 right-3">
+                  @if (loan.estatus === 'activo') {
+                    <span class="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">Activo</span>
+                  } @else {
+                    <span class="px-3 py-1 bg-gray-500 text-white text-xs font-semibold rounded-full">Finalizado</span>
+                  }
+                </div>
+              </div>
+
+              <div class="p-5">
+                <h3 class="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
+                  {{ loan.titulo }}
+                </h3>
+
+                <div class="space-y-2 text-sm text-gray-600">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Prestado: {{ formatDate(loan.fecha_creacion) }}</span>
+                  </div>
+
+                  @if (loan.fecha_entrega && loan.estatus === 'activo') {
+                    <div class="flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      @if (getDaysRemaining(loan.fecha_entrega)! > 0) {
+                        <span class="text-amber-600 font-medium">
+                          Vence en {{ getDaysRemaining(loan.fecha_entrega) }} días
+                        </span>
+                      } @else if (getDaysRemaining(loan.fecha_entrega)! === 0) {
+                        <span class="text-red-600 font-medium">Vence hoy</span>
+                      } @else {
+                        <span class="text-red-600 font-medium">
+                          Vencido hace {{ abs(getDaysRemaining(loan.fecha_entrega)!) }} días
+                        </span>
+                      }
+                    </div>
+                  }
+
+                  @if (loan.fecha_entrega && loan.estatus === 'finalizado') {
+                    <div class="flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                      <span>Devuelto: {{ formatDate(loan.fecha_entrega) }}</span>
+                    </div>
+                  }
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                  @if (loan.estatus === 'activo') {
+                    <button
+                      (click)="$event.stopPropagation()"
+                      class="w-full px-4 py-2 bg-red-900 text-white rounded-lg hover:bg-red-800 transition font-medium"
+                    >
+                      Renovar préstamo
+                    </button>
+                  } @else {
+                    <button
+                      (click)="$event.stopPropagation()"
+                      class="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+                    >
+                      Ver detalles
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- Estado vacío -->
+      @else {
+        <section class="text-center py-16">
+          <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+          </svg>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">
+            {{ isAdmin() ? 'No hay préstamos' : 'No tienes préstamos' }}
+          </h3>
+          <p class="text-gray-500 mb-4">
+            @if (selectedStatus() === 'all') {
+              {{ isAdmin() ? 'No se encontraron préstamos en el sistema' : 'Comienza a pedir libros prestados para que aparezcan aquí' }}
+            } @else if (selectedStatus() === 'activo' || selectedStatus() === 'pendiente' || selectedStatus() === 'finalizado') {
+              {{ isAdmin() ? `No hay préstamos en estado '${selectedStatus()}'` : `No tienes préstamos ${selectedStatus() === 'activo' ? 'activos' : 'finalizados'} en este momento` }}
+            }
+          </p>
+          @if (!isAdmin()) {
+            <button
+              (click)="router.navigate(['/explore'])"
+              class="bg-red-900 text-white px-6 py-3 rounded-full hover:bg-red-800 transition font-semibold"
+            >
+              Explorar libros
+            </button>
+          }
+        </section>
+      }
+
+    </main>
+  </div>
+
+  <app-footer></app-footer>
+
+</div>

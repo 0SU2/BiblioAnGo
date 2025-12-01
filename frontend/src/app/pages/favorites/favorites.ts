@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Header } from '../../shared/components/header/header';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
-import { UserService, LoanDTO } from '../../core/services/user';
+import { UserService } from '../../core/services/user';
 import { AutorDTO, LibroDTO } from '../../core/services/books';
 
 interface AuthorVM {
@@ -40,18 +40,16 @@ interface BookVM {
 })
 export class Favorites {
   searchQuery = signal('');
-  selectedCategory = signal<'authors' | 'saved-books' | 'loans'>('authors');
+  selectedCategory = signal<'authors' | 'saved-books'>('authors');
 
   categories = [
     { id: 'authors', label: 'Autores' },
-    { id: 'saved-books', label: 'Libros guardados' },
-    { id: 'loans', label: 'Préstamos' }
+    { id: 'saved-books', label: 'Libros guardados' }
   ];
 
   // Datos provenientes del backend
   allAuthors = signal<AuthorVM[]>([]);
   allSavedBooks = signal<BookVM[]>([]);
-  allLoans = signal<LoanDTO[]>([]);
 
   private normalizeText(text: string): string {
     return text
@@ -75,14 +73,6 @@ export class Favorites {
     return items.filter(b => this.normalizeText(b.title).includes(query));
   });
 
-  filteredLoans = computed(() => {
-    // En préstamos usualmente no se filtra por texto, pero se podría por título
-    const query = this.normalizeText(this.searchQuery());
-    const items = this.allLoans();
-    if (!query) return items;
-    return items.filter(l => this.normalizeText(l.titulo || '').includes(query));
-  });
-
   constructor(public router: Router, private user: UserService) {}
 
   async ngOnInit() {
@@ -91,14 +81,12 @@ export class Favorites {
 
   private async loadAll() {
     try {
-      const [authors, savedBooks, loans] = await Promise.all([
+      const [authors, savedBooks] = await Promise.all([
         this.user.getMyAuthors(),
-        this.user.getMyFavoriteBooks(),
-        this.user.getMyLoans()
+        this.user.getMyFavoriteBooks()
       ]);
       this.allAuthors.set(authors.map(this.mapAutor));
       this.allSavedBooks.set(savedBooks.map(this.mapLibro));
-      this.allLoans.set(loans);
     } catch (e) {
       console.error('Error cargando favoritos', e);
     }
@@ -108,12 +96,11 @@ export class Favorites {
     id: a.id_autor,
     name: [a.nombre, a.apaterno, a.amaterno || ''].filter(Boolean).join(' ').trim(),
     username: '@' + [a.nombre, a.apaterno, a.amaterno || ''].filter(Boolean).join('').toLowerCase(),
-    avatar: undefined,
+    avatar: (a as any).avatar || '', // Usar casting si la propiedad no está definida
     city: a.ciudad,
     country: a.pais,
-    // --- TEMPORARY FIX: Assign placeholder values ---
     stories: 0,
-    followers: 0,
+    followers: (a as any).seguidores || 0, // Usar casting si la propiedad no está definida
   });
 
   private mapLibro = (l: LibroDTO): BookVM => ({
@@ -132,7 +119,6 @@ export class Favorites {
   }
 
   onBookClick(isbn: string): void {
-    // Navegar a detalles del libro si existe la ruta
     console.log('Ver libro', isbn);
   }
 

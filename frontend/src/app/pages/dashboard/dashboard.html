@@ -7,23 +7,7 @@
     <main class="flex-1 p-4 md:p-6 bg-gray-50 overflow-y-auto">
 
     <section class="bg-linear-to-r from-pink-50 via-white to-amber-50 rounded-2xl shadow-sm p-4 md:p-8 mb-6 md:mb-8 relative overflow-hidden">
-      <div class="hidden md:block absolute left-8 top-1/2 -translate-y-1/2 opacity-20">
-          <svg class="w-32 h-32" viewBox="0 0 200 200" fill="none">
-            <path d="M50 40 L50 160 L100 140 L150 160 L150 40 Z" fill="#8B1538" opacity="0.3"/>
-            <rect x="60" y="50" width="80" height="3" fill="#8B1538"/>
-            <rect x="60" y="60" width="80" height="3" fill="#8B1538"/>
-            <rect x="60" y="70" width="60" height="3" fill="#8B1538"/>
-          </svg>
-        </div>
-
-        <div class="hidden md:block absolute right-8 top-1/2 -translate-y-1/2 opacity-20">
-          <svg class="w-24 h-24" viewBox="0 0 100 100" fill="none">
-            <path d="M30 80 Q20 60 30 40 L40 40 Q45 60 40 80 Z" fill="#8B1538"/>
-            <circle cx="35" cy="35" r="3" fill="#8B1538"/>
-          </svg>
-        </div>
-
-        <div class="text-center relative z-10">
+      <div class="text-center relative z-10">
           <div class="flex items-center justify-center gap-2 md:gap-3 mb-3 md:mb-4">
           <div class="w-10 h-10 md:w-12 md:h-12 bg-linear-to-br from-red-900 to-red-700 rounded-lg flex items-center justify-center shadow-lg">
             <svg class="w-6 h-6 md:w-7 md:h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -81,34 +65,53 @@
               Todos
             </button>
             <button
-              (click)="onCategoryChange('destacados')"
-              [class]="selectedCategory() === 'destacados' ? 'px-4 md:px-5 py-2 bg-red-900 text-white rounded-full whitespace-nowrap hover:bg-red-800 transition font-medium text-sm md:text-base snap-start shrink-0' : 'px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0'"
+              (click)="onCategoryChange('fantasia')"
+              [class]="selectedCategory() === 'fantasia' ? 'px-4 md:px-5 py-2 bg-red-900 text-white rounded-full whitespace-nowrap hover:bg-red-800 transition font-medium text-sm md:text-base snap-start shrink-0' : 'px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0'"
             >
-              Cuentos Infantiles
+              Fantasía
+            </button>
+            <button
+              (click)="onCategoryChange('poesia')"
+              [class]="selectedCategory() === 'poesia' ? 'px-4 md:px-5 py-2 bg-red-900 text-white rounded-full whitespace-nowrap hover:bg-red-800 transition font-medium text-sm md:text-base snap-start shrink-0' : 'px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0'"
+            >
+              Poesía
+            </button>
+            <button
+              (click)="onCategoryChange('suspenso')"
+              [class]="selectedCategory() === 'suspenso' ? 'px-4 md:px-5 py-2 bg-red-900 text-white rounded-full whitespace-nowrap hover:bg-red-800 transition font-medium text-sm md:text-base snap-start shrink-0' : 'px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0'"
+            >
+              Suspenso
             </button>
             <button class="px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0">
-              Aventuras Juveniles
+              Ciencia Ficción
             </button>
             <button class="px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0">
-              Literatura Clásica
+              Épica
             </button>
             <button class="px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0">
-              Historia y Biografías
-            </button>
-            <button class="px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0">
-              Arte y cultura
-            </button>
-            <button class="px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0">
-              Ciencia
-            </button>
-            <button class="px-4 md:px-5 py-2 bg-amber-100 text-amber-900 rounded-full whitespace-nowrap hover:bg-amber-200 transition font-medium text-sm md:text-base snap-start shrink-0">
-              Tecnología
+              Drama
             </button>
           </div>
         </div>
       </section>
 
-      @if (filteredBooks().length === 0 && searchQuery()) {
+      @if (isLoading()) {
+        <section class="text-center py-16">
+          <svg class="w-10 h-10 mx-auto text-red-900 animate-spin mb-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4.75V6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.1266 6.87347L16.0659 7.93413" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.25 12L17.75 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.1266 17.1265L16.0659 16.0659" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 17.75V19.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7.93413 16.0659L6.87347 17.1266" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6.25 12L4.75 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7.93413 7.93413L6.87347 6.87347" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p class="text-gray-500">Cargando libros...</p>
+        </section>
+      }
+
+      @if (!isLoading() && filteredBooks().length === 0 && searchQuery()) {
         <section class="text-center py-16">
           <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -124,11 +127,11 @@
         </section>
       }
 
-      @if (featuredBooks().length > 0) {
+      @if (!isLoading() && featuredBooks().length > 0) {
         <section class="mb-8 md:mb-10">
           <div class="flex items-center justify-between mb-4 md:mb-5">
             <h2 class="text-xl md:text-2xl font-bold text-gray-800">
-              {{ searchQuery() ? 'Resultados de búsqueda' : 'Libros Destacados' }}
+              {{ searchQuery() ? 'Resultados de búsqueda' : 'Libros Destacados / Nuevos' }}
             </h2>
             <button class="flex items-center gap-1 md:gap-2 text-red-900 font-semibold hover:text-red-800 transition group text-sm md:text-base">
               Ver más
@@ -153,36 +156,36 @@
 
             <div id="destacados" class="flex gap-3 md:gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
 
-              @for (book of featuredBooks(); track book.id) {
+              @for (book of featuredBooks(); track book.isbn) {
                 <div
-                  (click)="onBookClick(book.id)"
+                  (click)="onBookClick(book.isbn)"
                   class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0"
                 >
                   <div class="relative overflow-hidden">
-                    <img [src]="book.image" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="book.title">
+                    <img [src]="book.imagen" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="book.titulo">
                     @if (book.tag) {
                       <div class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold"
-                           [class]="book.tag === 'Popular' ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white'">
-                        {{ book.tag }}
+                           [class]="book.tag === 'popular' ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white'">
+                        {{ book.tag | uppercase }}
                       </div>
                     }
                     <button
-                      (click)="onAddToFavorites(book.id, $event)"
-                      [class]="isFavorite(book.id) ? 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-red-600 p-2 rounded-full shadow-lg transition-all hover:scale-110' : 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-400 p-2 rounded-full shadow-lg transition-all hover:scale-110'"
+                      (click)="onAddToFavorites(book.isbn, $event)"
+                      [class]="isFavorite(book.isbn) ? 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-red-600 p-2 rounded-full shadow-lg transition-all hover:scale-110' : 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-400 p-2 rounded-full shadow-lg transition-all hover:scale-110'"
                     >
-                      <svg class="w-4 h-4" [attr.fill]="isFavorite(book.id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4" [attr.fill]="isFavorite(book.isbn) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                       </svg>
                     </button>
                   </div>
                   <div class="p-3 md:p-4">
-                    <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">{{ book.title }}</h3>
-                    <p class="text-xs md:text-sm text-gray-500 mb-2">{{ book.author }}</p>
+                    <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">{{ book.titulo }}</h3>
+                    <p class="text-xs md:text-sm text-gray-500 mb-2">{{ book.autor }}</p>
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                        <span>{{ getStars(book.rating) }}</span>
+                        <span>{{ getStars(book.calificacion) }}</span>
                       </div>
-                      <button (click)="onRequestLoan(book.id, $event)" class="text-xs md:text-sm bg-red-900 text-white px-3 py-1 rounded-full hover:bg-red-800 transition">
+                      <button (click)="onRequestLoan(book.isbn, $event)" class="text-xs md:text-sm bg-red-900 text-white px-3 py-1 rounded-full hover:bg-red-800 transition">
                         Leer
                       </button>
                     </div>
@@ -194,7 +197,7 @@
         </section>
       }
 
-      @if (recommendedBooks().length > 0 && !searchQuery()) {
+      @if (!isLoading() && recommendedBooks().length > 0 && !searchQuery()) {
         <section class="mb-8 md:mb-10">
           <div class="flex items-center justify-between mb-4 md:mb-5">
             <h2 class="text-xl md:text-2xl font-bold text-gray-800">Recomendados para ti</h2>
@@ -220,30 +223,30 @@
             </button>
 
             <div id="recomendados" class="flex gap-3 md:gap-5 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              @for (book of recommendedBooks(); track book.id) {
+              @for (book of recommendedBooks(); track book.isbn) {
                 <div
-                  (click)="onBookClick(book.id)"
+                  (click)="onBookClick(book.isbn)"
                   class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer min-w-[150px] sm:min-w-[180px] md:min-w-[200px] snap-start shrink-0"
                 >
                   <div class="relative overflow-hidden">
-                    <img [src]="book.image" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="book.title">
+                    <img [src]="book.imagen" class="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="book.titulo">
                     <button
-                      (click)="onAddToFavorites(book.id, $event)"
-                      [class]="isFavorite(book.id) ? 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-red-600 p-2 rounded-full shadow-lg transition-all hover:scale-110' : 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-400 p-2 rounded-full shadow-lg transition-all hover:scale-110'"
+                      (click)="onAddToFavorites(book.isbn, $event)"
+                      [class]="isFavorite(book.isbn) ? 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-red-600 p-2 rounded-full shadow-lg transition-all hover:scale-110' : 'absolute bottom-2 right-2 bg-white/90 hover:bg-white text-gray-400 p-2 rounded-full shadow-lg transition-all hover:scale-110'"
                     >
-                      <svg class="w-4 h-4" [attr.fill]="isFavorite(book.id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4" [attr.fill]="isFavorite(book.isbn) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                       </svg>
                     </button>
                   </div>
                   <div class="p-3 md:p-4">
-                    <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">{{ book.title }}</h3>
-                    <p class="text-xs md:text-sm text-gray-500 mb-2">{{ book.author }}</p>
+                    <h3 class="font-bold text-gray-800 mb-1 line-clamp-2 text-sm md:text-base">{{ book.titulo }}</h3>
+                    <p class="text-xs md:text-sm text-gray-500 mb-2">{{ book.autor }}</p>
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-1 text-yellow-500 text-xs md:text-sm">
-                        <span>{{ getStars(book.rating) }}</span>
+                        <span>{{ getStars(book.calificacion) }}</span>
                       </div>
-                      <button (click)="onRequestLoan(book.id, $event)" class="text-xs md:text-sm bg-red-900 text-white px-3 py-1 rounded-full hover:bg-red-800 transition">
+                      <button (click)="onRequestLoan(book.isbn, $event)" class="text-xs md:text-sm bg-red-900 text-white px-3 py-1 rounded-full hover:bg-red-800 transition">
                         Leer
                       </button>
                     </div>
@@ -306,8 +309,91 @@
   </div>
 }
 
+@if (showBookDetailModal() && selectedBook()) {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-40 p-4 overflow-y-auto" (click)="closeModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 md:p-8 animate-fade-in my-8" (click)="$event.stopPropagation()">
+      <button (click)="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-1">
+          <img [src]="selectedBook()!.imagen" [alt]="selectedBook()!.titulo" class="w-full h-auto rounded-xl shadow-lg object-cover">
+          <div class="flex flex-col gap-3 mt-4">
+            <button
+              (click)="onAddToFavorites(selectedBook()!.isbn, $event)"
+              [class]="isFavorite(selectedBook()!.isbn) ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'"
+              class="flex items-center justify-center gap-2 py-2 rounded-lg font-semibold transition"
+            >
+              <svg class="w-5 h-5" [attr.fill]="isFavorite(selectedBook()!.isbn) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+              {{ isFavorite(selectedBook()!.isbn) ? 'Eliminar de Favoritos' : 'Añadir a Favoritos' }}
+            </button>
+            <button
+              (click)="onRequestLoan(selectedBook()!.isbn, $event)"
+              class="bg-red-900 hover:bg-red-800 text-white py-2 rounded-lg font-semibold transition"
+            >
+              Solicitar Préstamo / Leer
+            </button>
+          </div>
+        </div>
+
+        <div class="md:col-span-2">
+          <h2 class="text-3xl font-bold text-gray-800 mb-2">{{ selectedBook()!.titulo }}</h2>
+          <p class="text-xl font-semibold text-red-700 mb-4">{{ selectedBook()!.autor }}</p>
+
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center gap-1 text-yellow-500 text-lg">
+              <span>{{ getStars(selectedBook()!.calificacion) }}</span>
+            </div>
+            <span class="text-gray-500">|</span>
+            <span class="text-sm font-medium text-gray-600 bg-red-100 px-3 py-1 rounded-full">{{ selectedBook()!.categoria }}</span>
+            @if (selectedBook()!.tag) {
+              <span class="text-xs font-bold text-white px-3 py-1 rounded-full"
+                [class]="selectedBook()!.tag === 'popular' ? 'bg-yellow-500' : 'bg-red-500'">
+                {{ selectedBook()!.tag | uppercase }}
+              </span>
+            }
+          </div>
+
+          <h3 class="text-lg font-bold text-gray-700 mt-6 mb-2">Sinopsis</h3>
+          <p class="text-gray-600 mb-4">{{ selectedBook()!.prologo }}</p>
+
+          <h3 class="text-lg font-bold text-gray-700 mt-6 mb-2">Detalles Adicionales</h3>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="flex flex-col">
+              <span class="font-semibold text-gray-500">ISBN:</span>
+              <span class="text-gray-800">{{ selectedBook()!.isbn }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-semibold text-gray-500">Páginas:</span>
+              <span class="text-gray-800">{{ selectedBook()!.no_paginas }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-semibold text-gray-500">Publicación:</span>
+              <span class="text-gray-800">{{ selectedBook()!.fecha_de_publicacion }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-semibold text-gray-500">Lenguaje:</span>
+              <span class="text-gray-800">{{ selectedBook()!.lenguaje }}</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-semibold text-gray-500">Stock (Copias):</span>
+              <span [class]="selectedBook()!.cantidad > 0 ? 'text-green-600 font-bold' : 'text-red-600 font-bold'">
+                {{ selectedBook()!.cantidad > 0 ? selectedBook()!.cantidad : 'Agotado' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
 <script>
   function scrollBooks(id, direction) {
+    // ... (Contenido de la función scrollBooks, sin cambios) ...
     const container = document.getElementById(id);
     if (!container) return;
 
@@ -326,46 +412,3 @@
     }
   }
 </script>
-
-<style>
-  .scrollbar-thin::-webkit-scrollbar {
-    height: 8px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: #d1d5db;
-    border-radius: 4px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background-color: #f3f4f6;
-    border-radius: 4px;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.2s ease-out;
-  }
-</style>

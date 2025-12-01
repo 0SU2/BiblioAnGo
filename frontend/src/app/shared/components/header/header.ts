@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 export class Header implements OnInit {
   @Output() toggleSidebar = new EventEmitter<void>();
 
-  logoPath: string = 'assets/libabu-logo.png';
+  logoPath: string = '../../../assets/library.png';
   isLoggedIn: boolean = false;
   userInfo: any = null;
   showProfileMenu: boolean = false;

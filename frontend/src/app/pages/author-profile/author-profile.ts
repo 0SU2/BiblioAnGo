@@ -1,10 +1,13 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Header } from '../../shared/components/header/header';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
+import { Auth } from '../../core/services/auth';
+import { StoriesService, StoryDTO } from '../../core/services/stories';
+import { Api } from '../../core/services/api';
 
 interface Story {
   id: number;
@@ -45,122 +48,186 @@ interface AuthorProfile {
   ],
   templateUrl: './author-profile.html',
 })
-export class AuthorProfileData {
+export class AuthorProfileData implements OnInit {
   selectedTab = signal<'stories' | 'reading-list' | 'announcements'>('stories');
   isFollowing = signal(false);
   showMoreMenu = signal(false);
+  isOwnProfile = signal(false);
+  isLoading = signal(true);
 
   authorId: string | null = null;
 
-  // Información del autor (Inicializado como un objeto vacío para ser llenado después)
-  author: AuthorProfile = {} as AuthorProfile;
-  // Historias del autor (Se llenarán según el autor)
+  // Información del autor
+  author: AuthorProfile = {
+    id: 0,
+    name: '',
+    username: '',
+    avatar: '',
+    bio: '',
+    followers: '0',
+    following: 0,
+    memberSince: '',
+    socialLinks: {}
+  };
+
   stories: Story[] = [];
-
-  // Datos fijos para simular la base de datos (DB)
-  private readonly allAuthorsData: AuthorProfile[] = [
-    {
-      id: 1,
-      name: 'eVEm',
-      username: '@eVEm',
-      avatar: '/assets/authors/evem.jpg',
-      bio: 'Explorando los límites del omniverso y el destino de diferentes protagonistas. Sus historias desafían la lógica, sumergiendo a los lectores en un viaje donde el conocimiento es poder... y condena.',
-      followers: '2.2k',
-      following: 252,
-      memberSince: 'Oct 21, 2024',
-      socialLinks: {
-        facebook: 'https://facebook.com/evem',
-        instagram: 'https://instagram.com/evem',
-        twitter: 'https://twitter.com/evem'
-      }
-    },
-    {
-      id: 2,
-      name: 'vepiex4',
-      username: '@vepiex4',
-      avatar: '/assets/authors/vepiex4.jpg',
-      bio: 'Aventuras intergalácticas y viajes en el tiempo. Buscando el significado de la existencia en los confines del cosmos.',
-      followers: '5.8k',
-      following: 105,
-      memberSince: 'Nov 10, 2023',
-      socialLinks: {
-        instagram: 'https://instagram.com/vepiex4'
-      }
-    }
-  ];
-
-  // Datos fijos de las historias (simulando una DB)
-  private readonly allStoriesData: Story[] = [
-    {
-      id: 1,
-      title: 'Argonauta',
-      description: 'Eres el último. Tu mundo ha sido aniquilado, borrado de la existencia como si nunca hubiera sido. Pero aún respiras. En medio del vacío infinito, una ciudad imposible se alza ante ti. NIDO, el refugio de los perdidos, el hogar de aquellos que han sobrevivido al fin de su realidad.',
-      coverImage: '/assets/stories/argonauta.jpg',
-      views: '2.2k',
-      chapters: 102,
-      status: 'En Progreso',
-      tags: ['#351', 'fantasía', 'eVEm'], // Añadido Tag de autor para la simulación
-    },
-    {
-      id: 2,
-      title: 'The Realm of Gods',
-      description: 'Un reino más allá de la comprensión. Un espacio que esconde secretos ancestrales. Cuando el caos amenaza con consumirlo todo, solo aquellos dispuestos a desafiar a los dioses podrán cambiar el destino.',
-      coverImage: '/assets/stories/realm-gods.jpg',
-      views: '1.2k',
-      chapters: 53,
-      status: 'En Progreso',
-      tags: ['#351', 'aventura', 'eVEm'], // Añadido Tag de autor para la simulación
-    },
-    {
-      id: 3,
-      title: 'Tittle book',
-      description: 'Cuando la primera nevada cae, las sombras despiertan. Un antiguo hechizo se entrelaza con el tiempo, atrapando almas en una red de secretos oscuros. Solo aquellos dispuestos a desafiar la magia prohibida podrán romper las cadenas del pasado.',
-      coverImage: '/assets/stories/tittle-book.jpg',
-      views: '856',
-      chapters: 28,
-      status: 'En Progreso',
-      tags: ['#351', 'misterio', 'eVEm'], // Añadido Tag de autor para la simulación
-    },
-    {
-      id: 4,
-      title: 'Viaje a Nebulosa',
-      description: 'Tras el colapso del hiperespacio, un equipo de colonos debe encontrar un nuevo hogar antes de que su nave de soporte falle. La Nebulosa de Orión es su única esperanza.',
-      coverImage: '/assets/stories/nebulosa.jpg',
-      views: '998',
-      chapters: 4,
-      status: 'Completado',
-      tags: ['ciencia ficción', 'vepiex4'], // Añadido Tag de autor para la simulación
-    }
-  ];
-
-  // >>> CAMBIO CLAVE: Lógica de carga de datos basada en el ID
-  private loadAuthorData(id: number): void {
-    const foundAuthor = this.allAuthorsData.find(a => a.id === id);
-
-    if (foundAuthor) {
-      this.author = foundAuthor;
-      // Simular la carga de historias filtrando por el nombre de usuario/autor
-      this.stories = this.allStoriesData.filter(story =>
-        story.tags.includes(this.author.username.replace('@', ''))
-        || story.tags.includes(this.author.name.split(' ')[0]) // Filtro por nombre o username
-      );
-
-      console.log(`Perfil cargado para: ${this.author.name}`);
-    } else {
-      console.error(`Autor con ID ${id} no encontrado.`);
-      // Opcional: Redirigir a una página 404
-    }
-  }
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
-  ) {
+    private route: ActivatedRoute,
+    private authService: Auth,
+    private storiesService: StoriesService,
+    private api: Api
+  ) {}
+
+  async ngOnInit(): Promise<void> {
     this.authorId = this.route.snapshot.paramMap.get('id');
 
-    // Llamar a la función de carga al iniciar el componente
     if (this.authorId) {
-      this.loadAuthorData(parseInt(this.authorId, 10));
+      const currentUser = this.authService.currentUser();
+
+      // Verificar si es el perfil del usuario actual
+      if (currentUser && currentUser.nua === this.authorId) {
+        this.isOwnProfile.set(true);
+        await this.loadCurrentUserProfile(currentUser);
+      } else {
+        // Cargar perfil de otro autor desde el backend
+        await this.loadAuthorDataFromBackend(this.authorId);
+      }
+    }
+
+    this.isLoading.set(false);
+  }
+
+  private async loadCurrentUserProfile(user: any): Promise<void> {
+    try {
+      // Mapear los datos del usuario autenticado al formato de perfil
+      this.author = {
+        id: parseInt(user.nua) || 0,
+        name: user.nombre || 'Usuario',
+        username: user.usuario ? `@${user.usuario}` : '@usuario',
+        avatar: user.avatar || '/assets/default-avatar.png',
+        bio: user.biografia || 'Sin biografía',
+        followers: '0', // TODO: Implementar contador de seguidores en backend
+        following: 0,   // TODO: Implementar contador de siguiendo en backend
+        memberSince: user.fecha_de_creacion ?
+          new Date(user.fecha_de_creacion).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }) : 'Fecha desconocida',
+        socialLinks: {
+          facebook: user.facebook_link || undefined,
+          instagram: user.instagram_link || undefined,
+          twitter: user.twitter_link || undefined
+        }
+      };
+
+      // Cargar las historias del usuario desde el backend
+      await this.loadUserStories();
+
+      console.log(`Perfil propio cargado: ${this.author.name}`);
+    } catch (error) {
+      console.error('Error al cargar perfil propio:', error);
+      alert('Error al cargar el perfil');
+    }
+  }
+
+  private async loadAuthorDataFromBackend(authorId: string): Promise<void> {
+    try {
+      // Obtener datos del autor desde el backend
+      const response = await this.api.api.get(`/user/profile/${authorId}`);
+      const userData = response.data;
+
+      if (!userData) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      // Mapear los datos al formato de perfil
+      this.author = {
+        id: parseInt(userData.nua) || 0,
+        name: userData.nombre || 'Usuario',
+        username: userData.usuario ? `@${userData.usuario}` : '@usuario',
+        avatar: userData.avatar || '/assets/default-avatar.png',
+        bio: userData.biografia || 'Sin biografía',
+        followers: '0', // TODO: Implementar contador de seguidores
+        following: 0,   // TODO: Implementar contador de siguiendo
+        memberSince: userData.fecha_de_creacion ?
+          new Date(userData.fecha_de_creacion).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          }) : 'Fecha desconocida',
+        socialLinks: {
+          facebook: userData.facebook_link || undefined,
+          instagram: userData.instagram_link || undefined,
+          twitter: userData.twitter_link || undefined
+        }
+      };
+
+      // Cargar historias del autor
+      await this.loadAuthorStories(authorId);
+
+      console.log(`Perfil cargado para: ${this.author.name}`);
+    } catch (error: any) {
+      console.error('Error al cargar datos del autor:', error);
+      if (error?.response?.status === 404) {
+        alert('Autor no encontrado');
+        this.router.navigate(['/dashboard']);
+      } else {
+        alert('Error al cargar el perfil del autor');
+      }
+    }
+  }
+
+  private async loadUserStories(): Promise<void> {
+    try {
+      const storiesData: StoryDTO[] = await this.storiesService.getMyStories();
+
+      this.stories = storiesData.map(story => ({
+        id: story.id,
+        title: story.titulo,
+        description: 'Historia sin descripción', // TODO: Agregar campo descripción en backend
+        coverImage: story.cover || '/assets/default-cover.jpg',
+        views: story.vistas.toString(),
+        chapters: story.capitulos,
+        status: story.estatus === 'published' ? 'Publicado' : 'Borrador',
+        tags: [] // TODO: Agregar sistema de tags en backend
+      }));
+
+      console.log(`Cargadas ${this.stories.length} historias del usuario`);
+    } catch (error) {
+      console.error('Error al cargar historias del usuario:', error);
+      this.stories = [];
+    }
+  }
+
+  private async loadAuthorStories(authorId: string): Promise<void> {
+    try {
+      // Obtener historias del autor desde el backend
+      const response = await this.api.api.get(`/user/profile/${authorId}/stories`);
+      const storiesData = response.data;
+
+      if (!storiesData || !Array.isArray(storiesData)) {
+        this.stories = [];
+        return;
+      }
+
+      this.stories = storiesData.map((story: any) => ({
+        id: story.id,
+        title: story.titulo,
+        description: story.descripcion || 'Sin descripción',
+        coverImage: story.cover || '/assets/default-cover.jpg',
+        views: story.vistas?.toString() || '0',
+        chapters: story.capitulos || 0,
+        status: story.estatus === 'published' ? 'Publicado' : 'Borrador',
+        tags: story.tags || []
+      }));
+
+      console.log(`Cargadas ${this.stories.length} historias del autor`);
+    } catch (error) {
+      console.error('Error al cargar historias del autor:', error);
+      this.stories = [];
     }
   }
 
@@ -169,11 +236,18 @@ export class AuthorProfileData {
   }
 
   toggleFollow(): void {
+    if (this.isOwnProfile()) {
+      console.log('No puedes seguirte a ti mismo');
+      return;
+    }
+
     this.isFollowing.update(v => !v);
     const message = this.isFollowing() ?
       `Ahora sigues a ${this.author.name}` :
       `Has dejado de seguir a ${this.author.name}`;
     console.log(message);
+
+    // TODO: Implementar llamada al backend para seguir/dejar de seguir
   }
 
   toggleMoreMenu(): void {
@@ -186,22 +260,27 @@ export class AuthorProfileData {
   }
 
   onShareProfile(): void {
-    console.log('Compartir perfil');
-    alert('Enlace del perfil copiado al portapapeles');
+    const profileUrl = `${window.location.origin}/author-profile/${this.authorId}`;
+    navigator.clipboard.writeText(profileUrl).then(() => {
+      alert('Enlace del perfil copiado al portapapeles');
+    }).catch(() => {
+      alert('No se pudo copiar el enlace');
+    });
     this.showMoreMenu.set(false);
   }
 
   onReportProfile(): void {
     console.log('Reportar perfil');
-    alert('Reportar perfil');
+    alert('Función de reportar perfil - Por implementar en backend');
     this.showMoreMenu.set(false);
   }
 
   onBlockUser(): void {
     if (confirm(`¿Estás seguro de que deseas bloquear a ${this.author.name}?`)) {
       console.log('Bloquear usuario');
-      alert('Usuario bloqueado');
+      alert('Función de bloquear usuario - Por implementar en backend');
       this.showMoreMenu.set(false);
+      // TODO: Implementar llamada al backend para bloquear usuario
     }
   }
 

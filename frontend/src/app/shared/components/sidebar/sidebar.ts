@@ -1,39 +1,73 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, RouterLink } from '@angular/router'; // Necesario para la navegación en Angular
+import { RouterModule, RouterLink } from '@angular/router';
+import { Auth } from '../../../core/services/auth';
 
-// Define la estructura de cada elemento del menú
 interface NavItem {
-  icon: string; // Nombre del ícono (se usará como texto o en librerías de íconos)
+  icon: string;
   label: string;
   route: string;
-  isSpecial?: boolean; // Para diferenciar la sección superior/activa
+  isSpecial?: boolean;
+  adminOnly?: boolean;
+  requiresAuth?: boolean;
 }
 
 @Component({
-  selector: 'app-sidebar', // Selector usado en el HTML
+  selector: 'app-sidebar',
   standalone: true,
-  // Importa módulos de Angular necesarios para bucles (*ngFor) y enrutamiento
   imports: [CommonModule, RouterModule, RouterLink],
   templateUrl: './sidebar.html',
 })
-export class Sidebar { // Renombrado a Sidebar
+export class Sidebar {
+  private auth = inject(Auth);
 
-  // Lista de ítems de navegación basados en tu Figma
-  navItems = [
+  // Acceder al valor del signal currentUser()
+  get isAdmin(): boolean {
+    return this.auth.currentUser()?.rol === 'administrador';
+  }
+
+  // Verificar si el usuario está autenticado
+  get isLoggedIn(): boolean {
+    return this.auth.isLoggedIn();
+  }
+
+  navItems: NavItem[] = [
     { icon: 'home', label: 'Inicio', route: '/dashboard' },
-    { icon: 'explore', label: 'Explorar', route: '/explore' },
-    { icon: 'community', label: 'Comunidad', route: '/community' },
-    { icon: 'stories', label: 'Tus historias', route: '/stories' },
-    { icon: 'favorites', label: 'Favoritos', route: '/favorites' }
+    ...(this.isAdmin ? [] : [
+      { icon: 'explore', label: 'Explorar', route: '/explore' },
+      { icon: 'community', label: 'Comunidad', route: '/community' },
+      {
+        icon: 'stories',
+        label: 'Tus historias',
+        route: '/stories',
+        requiresAuth: true
+      },
+      {
+        icon: 'favorites',
+        label: 'Favoritos',
+        route: '/favorites',
+        requiresAuth: true
+      },
+    ]),
+    {
+      icon: 'loans',
+      label: 'Préstamos',
+      route: '/loans',
+      requiresAuth: true
+    }
   ];
+
+  get filteredNavItems(): NavItem[] {
+    return this.navItems.filter(item => {
+      if (item.requiresAuth && !this.isLoggedIn) {
+        return false;
+      }
+      return true;
+    });
+  }
 
   configItems = [
     { icon: 'settings', label: 'Configuración', route: '/settings' },
     { icon: 'help', label: 'Ayuda', route: '/help' }
   ];
-
-
-  // Nota: Para los íconos (home, explore, settings, etc.),
-  // usaremos los nombres de Google Material Icons ya que se asemejan al diseño.
 }
