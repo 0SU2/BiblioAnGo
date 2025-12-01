@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, resource, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -17,7 +17,7 @@ interface Book {
   category: string;
   docType?: string;
   publisher?: string;
-  year?: number;
+  year: number;
   language?: string;
   tag?: string;
 }
@@ -39,7 +39,8 @@ interface FilterOption {
   ],
   templateUrl: './explore.html',
 })
-export class Explore {
+export class Explore implements OnInit {
+  private readonly _bookService = inject(Books)
   searchQuery = signal('');
   showFilters = signal(false);
   favoriteBooks = signal<Set<string>>(new Set());
@@ -77,10 +78,15 @@ export class Explore {
 
   subjects: FilterOption[] = [
     { value: '', label: 'Todas' },
+    { value: 'poesia', label: 'Poesia' },
     { value: 'ficcion', label: 'Ficción' },
     { value: 'ciencia', label: 'Ciencia' },
+    { value: 'fantasia', label: 'Fantasia' },
     { value: 'historia', label: 'Historia' },
-    { value: 'arte', label: 'Arte' }
+    { value: 'ensayo', label: 'Ensayo' },
+    { value: 'epica', label: 'Épica' },
+    { value: 'drama', label: 'Drama' },
+    { value: 'suspenso', label: 'Suspenso' }
   ];
 
   tags: FilterOption[] = [
@@ -97,10 +103,6 @@ export class Explore {
 
   years: FilterOption[] = [
     { value: '', label: 'Todos' },
-    { value: '2024', label: '2024' },
-    { value: '2023', label: '2023' },
-    { value: '2022', label: '2022' },
-    { value: '2021', label: '2021' }
   ];
 
   languages: FilterOption[] = [
@@ -121,64 +123,20 @@ export class Explore {
       .trim();
   }
 
+  fetchAllBooksAPI = this._bookService.fetchAllBooksAPI
+  fetchAllAutorsAPI = this._bookService.fetchAllAuthorsAPI
+  fetchAllEditorialAPI = this._bookService.fetchAllEditorialAPI
+
   filteredBooks = computed(() => {
-    let books = this.allBooks;
-    const query = this.normalizeText(this.searchQuery());
-
-    // Búsqueda por texto
-    if (query) {
-      books = books.filter(book =>
-        this.normalizeText(book.title).includes(query) ||
-        this.normalizeText(book.author).includes(query)
-      );
-    }
-
-    if (this.selectedCategory()) {
-      books = books.filter(book => this.normalizeText(book.category) === this.normalizeText(this.selectedCategory()));
-    }
-
-    if (this.selectedDocType()) {
-      books = books.filter(book => (book.docType || '') === this.selectedDocType());
-    }
-
-    if (this.selectedYear()) {
-      books = books.filter(book => book.year?.toString() === this.selectedYear());
-    }
-
-    if (this.selectedLanguage()) {
-      books = books.filter(book => (book.language || '') === this.selectedLanguage());
-    }
-
-    if (this.selectedAuthor()) {
-      books = books.filter(book => this.normalizeText(book.author) === this.normalizeText(this.selectedAuthor()));
-    }
-
-    if (this.selectedPublisher()) {
-      books = books.filter(book => this.normalizeText(book.publisher || '') === this.normalizeText(this.selectedPublisher()));
-    }
-
-    return books;
-  });
-
-  constructor(
-    private router: Router,
-    public auth: Auth,
-    private booksService: Books
-  ) {}
-
-  async ngOnInit() {
-    try {
-      const [libros, autores, editoriales] = await Promise.all([
-        this.booksService.getBooks(),
-        this.booksService.getAuthors(),
-        this.booksService.getEditorials(),
-      ]);
-
+    let libros: LibroDTO[] = []
+    let autores: AutorDTO[] = []
+    let editoriales: EditorialDTO[] = []
+    if(this.fetchAllBooksAPI.hasValue() && this.fetchAllAutorsAPI.hasValue() && this.fetchAllEditorialAPI.hasValue()) {
+      libros = this.fetchAllBooksAPI.value()
+      autores = this.fetchAllAutorsAPI.value()
+      editoriales = this.fetchAllEditorialAPI.value()
       const authorMap = this.buildAuthorMap(autores);
       const editorialMap = this.buildEditorialMap(editoriales);
-
-      this.allBooks = libros.map(l => this.mapLibroToBook(l, authorMap, editorialMap));
-
       // Poblar categorías dinámicamente con las categorías presentes en los libros
       const catSet = new Set<string>();
       for (const l of libros) {
@@ -201,10 +159,63 @@ export class Explore {
         { value: '', label: 'Todas' },
         ...editorialOptions.map(name => ({ value: name, label: name }))
       ];
-    } catch (e) {
-      console.error('Error cargando datos de explorar', e);
+
+      // poblar los años
+      let temp:Book[] = libros.map(l => this.mapLibroToBook(l, authorMap, editorialMap));
+      this.years = temp.map(l => ({ value: l.year.toString(), label: l.year.toString()} as FilterOption))
+      const query = this.normalizeText(this.searchQuery());
+
+      // Búsqueda por texto
+      if (query) {
+        temp = temp.filter(book =>
+          this.normalizeText(book.title).includes(query) ||
+          this.normalizeText(book.author).includes(query)
+        );
+      }
+
+      if (this.selectedCategory()) {
+        temp = temp.filter(book => this.normalizeText(book.category) === this.normalizeText(this.selectedCategory()));
+      }
+
+      if (this.selectedDocType()) {
+        temp = temp.filter(book => (book.docType || '') === this.selectedDocType());
+      }
+
+      if (this.selectedYear()) {
+        temp = temp.filter(book => book.year?.toString() === this.selectedYear());
+      }
+
+      if (this.selectedLanguage()) {
+        temp = temp.filter(book => (book.language || '') === this.selectedLanguage());
+      }
+
+      if (this.selectedAuthor()) {
+        temp = temp.filter(book => this.normalizeText(book.author) === this.normalizeText(this.selectedAuthor()));
+      }
+
+      if (this.selectedPublisher()) {
+        temp = temp.filter(book => this.normalizeText(book.publisher || '') === this.normalizeText(this.selectedPublisher()));
+      }
+
+      if (this.selectedSubject()) {
+        temp = temp.filter(book => this.normalizeText(book.category) === this.normalizeText(this.selectedSubject()));
+      }
+
+      if(this.selectedTag()) {
+        temp = temp.filter(book => this.normalizeText(book.tag || '') === this.normalizeText(this.selectedTag()));
+      }
+      return temp
     }
-  }
+    return undefined
+  });
+
+  constructor(
+    private router: Router,
+    public auth: Auth,
+    private booksService: Books
+  ) { }
+
+  ngOnInit():void { }
 
   private buildAuthorMap(autores: AutorDTO[]): Map<string, string> {
     const map = new Map<string, string>();
@@ -234,13 +245,13 @@ export class Explore {
       title: l.titulo,
       author: authorMap.get(l.autor_id) || '',
       image: l.imagen,
-      rating: 0,
+      rating: l.calificacion,
       category: l.categoria || '',
-      docType: undefined,
+      docType: l.tipo_de_documento,
       publisher: editorialMap.get(l.editoria_id) || undefined,
-      year: l.fecha_de_publicacion ? new Date(l.fecha_de_publicacion).getFullYear() : undefined,
-      language: undefined,
-      tag: undefined,
+      year: new Date(l.fecha_de_publicacion).getFullYear(),
+      language: l.lenguaje,
+      tag: l.tag,
     };
   }
 

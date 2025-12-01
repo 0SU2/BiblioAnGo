@@ -244,20 +244,20 @@
       <section class="mb-6">
         <div class="flex items-center justify-between">
           <div class="text-gray-600">
-            <span class="font-semibold text-gray-800">{{ filteredClubs().length }}</span> resultados encontrados
+            <span class="font-semibold text-gray-800">{{ filteredClubs()?.length }}</span> resultados encontrados
           </div>
         </div>
       </section>
 
       <!-- All Clubs Grid -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        @for (club of filteredClubs(); track club.id) {
+        @for (club of filteredClubs(); track club.id_club) {
           <div
-            (click)="onClubClick(club.id)"
+            (click)="onClubClick(club.id_club)"
             class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group w-[150px] sm:w-[180px] md:w-[200px] shrink-0"
           >
             <div class="relative overflow-hidden">
-              <img [src]="club.image" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="club.title">
+              <img [src]="club.imagen" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" [alt]="club.titulo">
               @if (club.tag) {
                 <div class="absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-bold"
                     [class]="club.tag === 'Popular' ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white'">
@@ -266,15 +266,15 @@
               }
             </div>
             <div class="p-4">
-              <h3 class="font-bold text-gray-800 mb-2">{{ club.title }}</h3>
-              <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ club.description }}</p>
+              <h3 class="font-bold text-gray-800 mb-2">{{ club.titulo }}</h3>
+              <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ club.descripcion }}</p>
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-500">{{ club.members }} miembros</span>
+                <span class="text-sm text-gray-500">{{ club.miembros }} miembros</span>
                 <button
-                  (click)="onJoinClub(club.id, $event)"
-                  [class]="isJoined(club.id) ? 'text-xs bg-gray-400 text-white px-4 py-2 rounded-full hover:bg-gray-500 transition' : 'text-xs bg-red-900 text-white px-4 py-2 rounded-full hover:bg-red-800 transition'"
+                  (click)="onJoinClub(club.id_club, $event)"
+                  [class]="isJoined(club.id_club) ? 'text-xs bg-gray-400 text-white px-4 py-2 rounded-full hover:bg-gray-500 transition' : 'text-xs bg-red-900 text-white px-4 py-2 rounded-full hover:bg-red-800 transition'"
                 >
-                  {{ isJoined(club.id) ? 'Unido' : 'Unirse' }}
+                  {{ isJoined(club.id_club) ? 'Unido' : 'Unirse' }}
                 </button>
               </div>
             </div>
@@ -282,7 +282,7 @@
         }
       </section>
 
-      @if (filteredClubs().length === 0) {
+      @if (filteredClubs()?.length === 0) {
         <section class="text-center py-16">
           <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>

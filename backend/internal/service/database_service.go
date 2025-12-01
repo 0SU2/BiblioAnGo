@@ -7,9 +7,12 @@ import (
 
 type DatabaseService interface {
 	AllBooks() (*[]models.Libro, error)
+	AllBooksWithAutor() (*[]models.LibroWithAutor, error)
 	AllAutors() (*[]models.Autor, error)
 	AllEditorial() (*[]models.Editorial, error)
 	AllUsersDB() (*[]models.Editorial, error)
+	AllUsersLoans() (*[]models.PrestamosWithData, error)
+	AllClub() (*[]models.Clubs, error)
 }
 
 type databaseService struct {
@@ -46,6 +49,30 @@ func (s *databaseService) AllEditorial() (*[]models.Editorial, error) {
 
 func (s *databaseService) AllUsersDB() (*[]models.Editorial, error) {
 	response, err := s.repo.AllUsers()
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (s *databaseService) AllClub() (*[]models.Clubs, error) {
+	response, err := s.repo.AllClubs()
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (s *databaseService) AllBooksWithAutor() (*[]models.LibroWithAutor, error) {
+	response, err := s.repo.AllBooksWithAutor()
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func (s *databaseService) AllUsersLoans() (*[]models.PrestamosWithData, error) {
+	response, err := s.repo.AllUsersLoans()
 	if err != nil {
 		return nil, err
 	}

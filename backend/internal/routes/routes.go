@@ -34,8 +34,10 @@ func DefineRoutes(handler *chi.Mux, dbc *controller.DatabaseController, usc *con
 
 	handler.Route("/api", func(r chi.Router) {
 		r.Get("/allBooks", dbc.GetBooks)
+		r.Get("/allBooksWithAutor", dbc.GetBooksWithAutor)
 		r.Get("/allAutors", dbc.GetAllAutors)
 		r.Get("/allEditorial", dbc.GetAllEditorial)
+		r.Get("/allClubs", dbc.GetAllClub)
 		r.Route("/user", func(r chi.Router) {
 			r.Route("/auth", func(r chi.Router) {
 				r.Post("/register", usc.UserRegister)
@@ -44,6 +46,7 @@ func DefineRoutes(handler *chi.Mux, dbc *controller.DatabaseController, usc *con
 			r.Route("/data", func(r chi.Router) {
 				r.Use(middleware.Auth)
 				r.Get("/allUsers", dbc.GetAllUsersDB)
+				r.Get("/allLoans", dbc.GetUsersLoans)
 			})
 		})
 	})

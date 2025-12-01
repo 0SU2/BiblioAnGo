@@ -7,6 +7,7 @@ import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
 import { UserService, LoanDTO } from '../../core/services/user';
 import { Auth } from '../../core/services/auth';
+import { Api } from '../../core/services/api';
 
 interface LoanVM {
   id: string;
@@ -46,9 +47,11 @@ export class Loans {
   private auth = inject(Auth);
   private user = inject(UserService);
   public router = inject(Router);
+  public userService = inject(UserService)
 
   // Acceder al valor del signal currentUser()
   isAdmin = computed(() => {
+    this.userService.getMyLoans()
     return this.auth.currentUser()?.rol === 'administrador';
   });
 

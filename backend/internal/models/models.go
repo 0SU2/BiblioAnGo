@@ -53,13 +53,38 @@ type Libro struct {
 	Titulo               string `json:"titulo"`
 	Fecha_de_publicacion string `json:"fecha_de_publicacion"`
 	Cantidad             int    `json:"cantidad"`
-	Categoria            string `json:"categoria"`
-	Imagen               string `json:"imagen"`
 	No_edicion           string `json:"no_edicion"`
 	No_paginas           string `json:"no_paginas"`
 	Prologo              string `json:"prologo"`
+	Imagen               string `json:"imagen"`
+	Categoria            string `json:"categoria"`
+	Calificacion         int    `json:"calificacion"`
+	Tag                  string `json:"tag"`
+	Tipo_de_documento    string `json:"tipo_de_documento"`
+	Lenguaje             string `json:"lenguaje"`
 	Autor_id             string `json:"autor_id"`
 	Editoria_id          string `json:"editoria_id"`
+}
+
+type LibroWithAutor struct {
+	ISBN                 string `json:"isbn"`
+	Titulo               string `json:"titulo"`
+	Fecha_de_publicacion string `json:"fecha_de_publicacion"`
+	Cantidad             int    `json:"cantidad"`
+	No_edicion           string `json:"no_edicion"`
+	No_paginas           string `json:"no_paginas"`
+	Prologo              string `json:"prologo"`
+	Imagen               string `json:"imagen"`
+	Categoria            string `json:"categoria"`
+	Calificacion         int    `json:"calificacion"`
+	Tag                  string `json:"tag"`
+	Tipo_de_documento    string `json:"tipo_de_documento"`
+	Lenguaje             string `json:"lenguaje"`
+	Autor_id             string `json:"autor_id"`
+	Editoria_id          string `json:"editoria_id"`
+	Nombre               string `json:"nombre_autor"`
+	Apaterno             string `json:"apaterno_autor"`
+	Amaterno             any    `json:"amaterno_autor"`
 }
 
 type Autor struct {
@@ -86,9 +111,10 @@ type Clubs struct {
 	Titulo       string `json:"titulo"`
 	Descripcion  string `json:"descripcion"`
 	Imagen       string `json:"imagen"`
-	Miembros     string `json:"miembros"`
+	Miembros     int    `json:"miembros"`
+	Tipo         string `json:"tipo"`
 	Categoria    string `json:"categoria"`
-	Calificacion string `json:"calificacion"`
+	Calificacion int    `json:"calificacion"`
 	Tag          string `json:"tag"`
 }
 
@@ -99,4 +125,18 @@ type Prestamos struct {
 	Estatus           string `json:"estatus"`
 	Pd_nua            string `json:"pd_nua"`
 	Pd_libro          string `json:"pd_libro"`
+}
+
+type PrestamosWithData struct {
+	ID_PRESTAMO       string `json:"id"`
+	Titulo            string `json:"titulo,omitempty"`
+	ISBN              string `json:"isbn,omitempty"`
+	Imagen            string `json:"imagen,omitempty"`
+	Fecha_de_creacion string `json:"fecha_de_creacion"`
+	Fecha_de_entrega  any    `json:"fecha_de_entrega"`
+	Estatus           string `json:"estatus"`
+	Nombre            string `json:"usuario_nombre"`
+	Apaterno          string `json:"usuario_apaterno"`
+	Correo            string `json:"usuario_correo,omitempty"`
+	Avatar            string `json:"usuario_avatar"`
 }

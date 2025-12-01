@@ -7,6 +7,7 @@ import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
 import { Auth } from '../../core/services/auth';
 import { UserService } from '../../core/services/user';
+import { LibroANDAutor } from '../../core/services/books';
 
 // --- Simulación de DTOs y Servicio de Libros ---
 
@@ -30,104 +31,27 @@ export interface BookDTO {
 // En una aplicación real, este servicio haría la llamada al endpoint /api/books
 @Injectable({ providedIn: 'root' })
 export class BookService {
-  private mockBooks: BookDTO[] = [
-    // Usamos datos simulados basados en la estructura SQL para el ejemplo
-    {
-      isbn: '001A',
-      titulo: 'Cien años de soledad',
-      autor: 'Gabriel García Márquez', // Simplificado
-      imagen: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fellector.com.pa%2Fcdn%2Fshop%2Ffiles%2Fcien-anos-de-soledad.webp%3Fv%3D1731690530%26width%3D1100&f=1&nofb=1&ipt=813d6e4a5fe789ef8a9532cccdcf2c5689cb7d0a67aabf96bd6c092cdcd027f2',
-      calificacion: 3,
-      tag: 'popular',
-      categoria: 'Poesia',
-      prologo: 'Una saga familiar que muestra el realismo mágico en el pueblo ficticio de Macondo.',
-      cantidad: 10,
-      fecha_de_publicacion: '1967-06-05',
-      no_paginas: '417',
-      lenguaje: 'Español'
-    },
-    {
-      isbn: '003B',
-      titulo: 'Orgullo y prejuicio',
-      autor: 'Jane Austen',
-      imagen: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpendulo.com%2Fimagenes_grandes%2F9788494%2F978849441163.GIF&f=1&nofb=1&ipt=0a9e3a62ae5ff9c6993eaf88397d7a1729f77135c7c96b7cd09e0dc9c2192c2f',
-      calificacion: 4,
-      tag: '',
-      categoria: 'Suspenso',
-      prologo: 'Un análisis de las relaciones y el matrimonio en la Inglaterra del siglo XIX.',
-      cantidad: 4,
-      fecha_de_publicacion: '1813-01-28',
-      no_paginas: '432',
-      lenguaje: 'Inglés'
-    },
-    {
-      isbn: '006A',
-      titulo: 'El proceso',
-      autor: 'Autor Simulado',
-      imagen: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.polifemo.com%2Fstatic%2Fimg%2Fportadas%2F_visd_0000JPG02JU0.jpg&f=1&nofb=1&ipt=374db32f63af6d8bece7664f0d4c5dfb355aecbd47f421a2a380bb02e7af4eab',
-      calificacion: 5,
-      tag: 'nuevo',
-      categoria: 'Suspenso',
-      prologo: 'Un hombre es arrestado por un crimen que no entiende, reflejando la absurdidad del sistema judicial.',
-      cantidad: 19,
-      fecha_de_publicacion: '1925-08-10',
-      no_paginas: '255',
-      lenguaje: 'Español'
-    },
-    {
-      isbn: '002A',
-      titulo: 'Don Quijote de la Mancha',
-      autor: 'Miguel de Cervantes',
-      imagen: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.marcialpons.es%2Fmedia%2Fimg%2Fportadas%2F2023%2F4%2F18%2F9788408270881jfif&f=1&nofb=1&ipt=296903e218931f4c5faceda9d3c3d5763bffbddf0878d0944160155c04bc5fdf',
-      calificacion: 2,
-      tag: 'recomendado',
-      categoria: 'Fantasia',
-      prologo: 'La historia de un hidalgo que busca revivir la caballería, enfrentándose a la locura y la realidad.',
-      cantidad: 2,
-      fecha_de_publicacion: '1605-01-16',
-      no_paginas: '863',
-      lenguaje: 'Español'
-    },
-    {
-      isbn: '001B',
-      titulo: 'Moby Dick',
-      autor: 'Autor Simulado 2',
-      imagen: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.senscritique.com%2Fmedia%2F000019481669%2Fsource_big%2FMoby_Dick.jpg&f=1&nofb=1&ipt=bbcaedf85f5f942e139c91abda22e4c6e599d8171934a0edddc9e13f738381b5',
-      calificacion: 5,
-      tag: 'popular',
-      categoria: 'Épica',
-      prologo: 'La obsesión del capitán Ahab por cazar a la gran ballena blanca.',
-      cantidad: 3,
-      fecha_de_publicacion: '1851-10-18',
-      no_paginas: '635',
-      lenguaje: 'Inglés'
-    },
-    {
-      isbn: '004A',
-      titulo: 'Crimen y castigo',
-      autor: 'Autor Simulado 3',
-      imagen: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.storytel.com%2Fimages%2Fe%2F640x640%2F0002060314.jpg&f=1&nofb=1&ipt=48955b80122de32d8821adba6c087b0fec57c0b651dd5c37c9e4a1ca7c4a474e',
-      calificacion: 2,
-      tag: 'recomendado',
-      categoria: 'Fantasia',
-      prologo: 'Un joven estudiante comete un asesinato y lidia con su culpa.',
-      cantidad: 4,
-      fecha_de_publicacion: '1866-01-01',
-      no_paginas: '430',
-      lenguaje: 'Español'
-    },
-  ];
 
-  async getAllBooks(): Promise<BookDTO[]> {
-    // Simula un pequeño retraso de red
-    return new Promise(resolve => {
-      setTimeout(() => resolve(this.mockBooks), 500);
-    });
+  async getAllBooks(): Promise<LibroANDAutor[]> {
+    const BASE_URL = 'http://localhost:8080';
+    // Aquí iría el fetch real a la API, por ejemplo:
+    try {
+      const res = await (await fetch(`${BASE_URL}/api/allBooksWithAutor`)).json() as { data: LibroANDAutor[] };
+      return res.data;
+    } catch (error) {
+      throw error
+    }
+    // ...
+    // Para la simulación:
+    // return new Promise(resolve => {
+    //   setTimeout(() => resolve(this.mockBooks), 500); // Simula un pequeño retraso de red
+    // });
   }
 
-  getBookByIsbn(isbn: string): BookDTO | undefined {
-    return this.mockBooks.find(b => b.isbn === isbn);
-  }
+  // async getBookByIsbn(isbn: string): Promise<BookDTO | undefined> {
+  //   let temp = await this.getAllBooks().find(b => b.isbn === isbn);
+  //   return temp
+  // }
 }
 
 @Component({
@@ -154,8 +78,8 @@ export class Dashboard implements OnInit {
 
   // Signals para datos
   favoriteBooks = signal<Set<string>>(new Set());
-  allBooks = signal<BookDTO[]>([]);
-  selectedBook = signal<BookDTO | null>(null);
+  allBooks = signal<LibroANDAutor[]>([]);
+  selectedBook = signal<LibroANDAutor | null>(null);
 
   // NUEVAS Signals para Préstamo/Lectura
   showLoanReadChoiceModal = signal(false); // Modal para elegir entre Préstamo/Lectura
@@ -187,14 +111,17 @@ export class Dashboard implements OnInit {
     const category = this.selectedCategory();
     let books = this.allBooks();
 
+    // Filtrar por categoría (ahora usa la categoría de SQL: 'Poesia', 'Fantasia', etc.)
     if (category !== 'all') {
+      // Usamos includes para buscar tags y categorías de la simulación
       books = books.filter(book => this.normalizeText(book.categoria).includes(category) || (book.tag && this.normalizeText(book.tag).includes(category)));
     }
 
+    // Filtrar por búsqueda
     if (query) {
       books = books.filter(book =>
         this.normalizeText(book.titulo).includes(query) ||
-        this.normalizeText(book.autor).includes(query)
+        this.normalizeText(book.nombre_autor).includes(query)
       );
     }
 
@@ -202,11 +129,13 @@ export class Dashboard implements OnInit {
   });
 
   // Libros destacados filtrados
+  // Ahora filtramos por el tag 'popular' o 'nuevo' de SQL, simulando la sección "Destacados"
   featuredBooks = computed(() =>
     this.filteredBooks().filter(book => book.tag === 'popular' || book.tag === 'nuevo')
   );
 
   // Libros recomendados filtrados
+  // Ahora filtramos por el tag 'recomendado' de SQL
   recommendedBooks = computed(() =>
     this.filteredBooks().filter(book => book.tag === 'recomendado')
   );

@@ -27,16 +27,10 @@ export class Login {
 
     const success = await this.auth.login(this.usuario, this.password);
 
-    if (success) {
-      const returnUrl = this.auth.getAndClearReturnUrl();
-
-      if (returnUrl) {
-        this.router.navigateByUrl(returnUrl);
-      } else {
-        this.router.navigate(['/dashboard']);
-      }
+    if (success.status) {
+      this.router.navigate(['/dashboard']);
     } else {
-      this.errorMessage = 'Usuario o contraseña incorrectos';
+      this.errorMessage = success.message
     }
   }
 }

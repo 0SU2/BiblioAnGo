@@ -12,6 +12,7 @@ export class Api {
     });
     this.api.interceptors.request.use((config) => {
       const token = localStorage.getItem('token')
+      console.log(token)
       if (token) {
         config.headers = config.headers || {}
         config.headers.Authorization = `Bearer ${token}`
@@ -23,8 +24,9 @@ export class Api {
       (res) => res,
       (err) => {
         if (err?.response?.status === 401) {
-          localStorage.removeItem('token')
-          window.location.href = '/login'
+          console.log(localStorage.getItem('token'))
+          // localStorage.removeItem('token')
+          // window.location.href = '/login'
         }
         return Promise.reject(err)
       }

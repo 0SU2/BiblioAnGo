@@ -19,7 +19,7 @@ type Claims struct {
 var JwtString string
 
 func GenerateToken(nua, usuario string) (string, error) {
-	exp := time.Now().Add(time.Duration(1000) * time.Hour)
+	exp := time.Now().Add(time.Duration(10000) * time.Hour)
 	claims := Claims{
 		NUA:     nua,
 		Usuario: usuario,
@@ -36,7 +36,8 @@ func HashPassword(pw string) (string, error) {
 }
 
 func ParseToken(tokenStr string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	log.Printf("[utils] %s", JwtString)
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (any, error) {
 		return []byte(JwtString), nil
 	})
 	if err != nil {

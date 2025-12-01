@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -8,7 +8,7 @@ import { Footer } from '../../shared/components/footer/footer';
 import { Auth } from '../../core/services/auth';
 import { CommunityService, AutorDTO, EditorialDTO } from '../../core/services/community';
 
-const CLUB_TYPES = ['niños','jóvenes','avanzados'] as const;
+const CLUB_TYPES = ['niños','jovenes','avanzados'] as const;
 type ClubType = typeof CLUB_TYPES[number];
 
 interface Club {
@@ -39,7 +39,9 @@ interface FilterOption {
   ],
   templateUrl: './community.html',
 })
-export class Community {
+export class Community implements OnInit {
+
+  private readonly _communityService = inject(CommunityService)
   searchQuery = signal('');
   showFilters = signal(false);
   joinedClubs = signal<Set<string>>(new Set());
@@ -84,37 +86,40 @@ export class Community {
       .trim();
   }
 
+  fetchAllClubsAPI = this._communityService.fetchAllClubs
+
   filteredClubs = computed(() => {
-    let clubs = this.allClubs;
-    const query = this.normalizeText(this.searchQuery());
+    if(this.fetchAllClubsAPI.hasValue()) {
+      let clubs = this.fetchAllClubsAPI.value()
+      const query = this.normalizeText(this.searchQuery());
+      if (query) {
+        clubs = clubs.filter(club =>
+          this.normalizeText(club.titulo).includes(query) ||
+          this.normalizeText(club.descripcion).includes(query)
+        );
+      }
+      if (this.selectedType()) {
+        clubs = clubs.filter(club => club.tipo === this.selectedType());
+      }
 
-    if (query) {
-      clubs = clubs.filter(club =>
-        this.normalizeText(club.title).includes(query) ||
-        this.normalizeText(club.description).includes(query)
-      );
+      if (this.selectedCategory()) {
+        clubs = clubs.filter(club => club.categoria === this.selectedCategory());
+      }
+
+      if (this.selectedMemberRange()) {
+        clubs = clubs.filter(club => {
+          const range = this.selectedMemberRange();
+          if (range === '0-50') return club.miembros <= 50;
+          if (range === '51-100') return club.miembros > 50 && club.miembros <= 100;
+          if (range === '101-200') return club.miembros > 100 && club.miembros <= 200;
+          if (range === '200+') return club.miembros > 200;
+          return true;
+        });
+      }
+      return clubs;
     }
 
-    if (this.selectedType()) {
-      clubs = clubs.filter(club => club.type === this.selectedType());
-    }
-
-    if (this.selectedCategory()) {
-      clubs = clubs.filter(club => club.category === this.selectedCategory());
-    }
-
-    if (this.selectedMemberRange()) {
-      clubs = clubs.filter(club => {
-        const range = this.selectedMemberRange();
-        if (range === '0-50') return club.members <= 50;
-        if (range === '51-100') return club.members > 50 && club.members <= 100;
-        if (range === '101-200') return club.members > 100 && club.members <= 200;
-        if (range === '200+') return club.members > 200;
-        return true;
-      });
-    }
-
-    return clubs;
+    return undefined;
   });
 
   popularClubs = computed(() =>
@@ -128,52 +133,9 @@ export class Community {
   constructor(
     private router: Router,
     public auth: Auth,
-    private community: CommunityService
   ) {}
 
-  async ngOnInit() {
-    try {
-      const [autores, editoriales] = await Promise.all([
-        this.community.getAuthors(),
-        this.community.getEditorials()
-      ]);
-
-      const generated = [
-        ...this.generateAuthorClubs(autores),
-        ...this.generateEditorialClubs(editoriales)
-      ];
-
-      this.allClubs = generated;
-    } catch (e) {
-      console.error('Error cargando comunidad', e);
-    }
-  }
-
-  private generateAuthorClubs(autores: AutorDTO[]): Club[] {
-    return autores.slice(0, 12).map(a => ({
-      id: `autor-${a.id_autor}`,
-      title: `Club de ${a.nombre} ${a.apaterno}${a.amaterno ? ' ' + a.amaterno : ''}`.trim(),
-      description: `Comunidad para fans de ${a.nombre} ${a.apaterno}`,
-      image: '/assets/clubs/club-lectura.jpg',
-      members: Math.floor(Math.random() * 300) + 20,
-      category: 'lectura',
-      type: CLUB_TYPES[Math.floor(Math.random()*CLUB_TYPES.length)] as ClubType,
-      tag: Math.random() > 0.7 ? 'Nuevo' : undefined,
-    }));
-  }
-
-  private generateEditorialClubs(editoriales: EditorialDTO[]): Club[] {
-    return editoriales.slice(0, 8).map(e => ({
-      id: `editorial-${e.id_editoria}`,
-      title: `Editorial ${e.Nombre}`,
-      description: `Club para lectores de ${e.Nombre}`,
-      image: '/assets/clubs/literatura.jpg',
-      members: Math.floor(Math.random() * 200) + 50,
-      category: 'literatura',
-      type: CLUB_TYPES[Math.floor(Math.random()*CLUB_TYPES.length)] as ClubType,
-      tag: Math.random() > 0.5 ? 'Popular' : undefined,
-    }));
-  }
+  ngOnInit() { }
 
   onSearch(): void {
     // filtrado automático

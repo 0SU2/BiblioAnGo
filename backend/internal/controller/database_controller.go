@@ -47,3 +47,30 @@ func (c *DatabaseController) GetAllUsersDB(w http.ResponseWriter, r *http.Reques
 	}
 	utils.RespondJSON(w, r, http.StatusOK, map[string]any{"status": true, "data": response})
 }
+
+func (c *DatabaseController) GetAllClub(w http.ResponseWriter, r *http.Request) {
+	response, err := c.dbc.AllClub()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	utils.RespondJSON(w, r, http.StatusOK, map[string]any{"status": true, "data": response})
+}
+
+func (c *DatabaseController) GetBooksWithAutor(w http.ResponseWriter, r *http.Request) {
+	response, err := c.dbc.AllBooksWithAutor()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	utils.RespondJSON(w, r, http.StatusOK, map[string]any{"status": true, "data": response})
+}
+
+func (c *DatabaseController) GetUsersLoans(w http.ResponseWriter, r *http.Request) {
+	response, err := c.dbc.AllUsersLoans()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	utils.RespondJSON(w, r, http.StatusOK, map[string]any{"status": true, "data": response})
+}

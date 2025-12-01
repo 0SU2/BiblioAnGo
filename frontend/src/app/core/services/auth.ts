@@ -28,7 +28,7 @@ export class Auth {
 
   private checkStoredSession(): void {
     const storedUser = localStorage.getItem('currentUser');
-    const storedToken = localStorage.getItem('auth_token');
+    const storedToken = localStorage.getItem('token');
     if (storedUser && storedToken) {
       this.currentUser.set(JSON.parse(storedUser));
       this.isAuthenticated.set(true);
@@ -52,6 +52,7 @@ export class Auth {
       return this.authResponse;
     }
     localStorage.setItem('currentUser', JSON.stringify(data.user));
+    localStorage.setItem('token', JSON.stringify(data.token));
      this.currentUser.set(data.user);
     this.isAuthenticated.set(true);
     this.authResponse.message = "";
