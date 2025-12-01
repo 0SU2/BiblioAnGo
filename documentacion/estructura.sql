@@ -127,7 +127,7 @@ CREATE TABLE favoritos (
 );
 
 CREATE TABLE prestamos (
-    ID_PRESTAMOS INT UNSIGNED NOT NULL PRIMARY KEY,
+    ID_PRESTAMOS INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     fecha_de_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_de_entrega TIMESTAMP,
     estatus ENUM('activo', 'finalizado') DEFAULT 'activo',
