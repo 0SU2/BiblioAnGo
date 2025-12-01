@@ -144,12 +144,12 @@ INSERT INTO usuarios(
     -- Admin
     'Oscar', 'Rosas', 'Zavala', 'or@ugto.mx', 'Villas', 'Irapuato', 'Guanajuato', 'Mexico', '123456789', 'ren01', 
     '123456789',  -- TODO: La contraseña es un ejemplo, pero esta va a ser encriptada en el siguiente ticket
-    'admin'
+    'administrador'
 ), (
     -- Usuario particular
     'Oscar', 'Rosas', 'Zavala', 'ri@ugto.mx', 'Villas', 'Irapuato', 'Guanajuato', 'Mexico', '123456789', 'ren02', 
     '123456789',  -- TODO: La contraseña es un ejemplo, pero esta va a ser encriptada en el siguiente ticket
-    'user'
+    'usuario'
 );
 
 INSERT INTO autores 

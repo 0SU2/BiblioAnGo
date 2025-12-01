@@ -6,15 +6,19 @@ import { Header } from '../../shared/components/header/header';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Footer } from '../../shared/components/footer/footer';
 import { Auth } from '../../core/services/auth';
+import { CommunityService, AutorDTO, EditorialDTO } from '../../core/services/community';
+
+const CLUB_TYPES = ['niños','jóvenes','avanzados'] as const;
+type ClubType = typeof CLUB_TYPES[number];
 
 interface Club {
-  id: number;
+  id: string;
   title: string;
   description: string;
   image: string;
   members: number;
   category: string;
-  type: 'niños' | 'jóvenes' | 'avanzados';
+  type: ClubType;
   tag?: string;
 }
 
@@ -38,7 +42,7 @@ interface FilterOption {
 export class Community {
   searchQuery = signal('');
   showFilters = signal(false);
-  joinedClubs = signal<Set<number>>(new Set());
+  joinedClubs = signal<Set<string>>(new Set());
 
   selectedType = signal('');
   selectedCategory = signal('');
@@ -49,9 +53,9 @@ export class Community {
 
   clubTypes: FilterOption[] = [
     { value: '', label: 'Todos' },
-    { value: 'niños', label: 'Clubes para niños' },
-    { value: 'jóvenes', label: 'Clubes para jóvenes' },
-    { value: 'avanzados', label: 'Clubes avanzados' }
+    { value: CLUB_TYPES[0], label: 'Clubes para niños' },
+    { value: CLUB_TYPES[1], label: 'Clubes para jóvenes' },
+    { value: CLUB_TYPES[2], label: 'Clubes avanzados' }
   ];
 
   categories: FilterOption[] = [
@@ -70,83 +74,7 @@ export class Community {
     { value: '200+', label: '200+ miembros' }
   ];
 
-  allClubs: Club[] = [
-    {
-      id: 1,
-      title: 'Leer Cambia Todo',
-      description: 'Un espacio para compartir el amor por la lectura y descubrir nuevos mundos',
-      image: '/assets/clubs/leer-cambia.jpg',
-      members: 245,
-      category: 'lectura',
-      type: 'jóvenes',
-      tag: 'Popular'
-    },
-    {
-      id: 2,
-      title: 'Club de Lectura',
-      description: 'Únete a nuestras discusiones semanales sobre grandes obras literarias',
-      image: '/assets/clubs/club-lectura.jpg',
-      members: 189,
-      category: 'lectura',
-      type: 'avanzados'
-    },
-    {
-      id: 3,
-      title: 'Lenguaje y Literatura',
-      description: 'Explorando los secretos del lenguaje y la expresión literaria',
-      image: '/assets/clubs/literatura.jpg',
-      members: 156,
-      category: 'literatura',
-      type: 'jóvenes'
-    },
-    {
-      id: 4,
-      title: 'Club de Fantasía',
-      description: 'Para amantes de mundos mágicos y aventuras épicas',
-      image: '/assets/clubs/fantasia.jpg',
-      members: 312,
-      category: 'lectura',
-      type: 'jóvenes',
-      tag: 'Nuevo'
-    },
-    {
-      id: 5,
-      title: 'Literatura Contemporánea',
-      description: 'Discutimos las obras más relevantes de la literatura actual',
-      image: '/assets/clubs/literatura-reciente.jpg',
-      members: 98,
-      category: 'literatura',
-      type: 'avanzados',
-      tag: 'Nuevo'
-    },
-    {
-      id: 6,
-      title: 'Cuentos de Otoño',
-      description: 'Compartiendo historias que nos inspiran en cada estación',
-      image: '/assets/clubs/cuentos-otono.jpg',
-      members: 127,
-      category: 'escritura',
-      type: 'jóvenes'
-    },
-    {
-      id: 7,
-      title: 'Reading Makes You Better',
-      description: 'English reading club for language learners',
-      image: '/assets/clubs/reading-better.jpg',
-      members: 203,
-      category: 'lectura',
-      type: 'avanzados'
-    },
-    {
-      id: 8,
-      title: 'Pequeños Lectores',
-      description: 'Club de lectura para los más pequeños de la casa',
-      image: '/assets/clubs/kids-club.jpg',
-      members: 78,
-      category: 'lectura',
-      type: 'niños'
-    }
-  ];
+  allClubs: Club[] = [];
 
   private normalizeText(text: string): string {
     return text
@@ -199,11 +127,56 @@ export class Community {
 
   constructor(
     private router: Router,
-    public auth: Auth
+    public auth: Auth,
+    private community: CommunityService
   ) {}
 
+  async ngOnInit() {
+    try {
+      const [autores, editoriales] = await Promise.all([
+        this.community.getAuthors(),
+        this.community.getEditorials()
+      ]);
+
+      const generated = [
+        ...this.generateAuthorClubs(autores),
+        ...this.generateEditorialClubs(editoriales)
+      ];
+
+      this.allClubs = generated;
+    } catch (e) {
+      console.error('Error cargando comunidad', e);
+    }
+  }
+
+  private generateAuthorClubs(autores: AutorDTO[]): Club[] {
+    return autores.slice(0, 12).map(a => ({
+      id: `autor-${a.id_autor}`,
+      title: `Club de ${a.nombre} ${a.apaterno}${a.amaterno ? ' ' + a.amaterno : ''}`.trim(),
+      description: `Comunidad para fans de ${a.nombre} ${a.apaterno}`,
+      image: '/assets/clubs/club-lectura.jpg',
+      members: Math.floor(Math.random() * 300) + 20,
+      category: 'lectura',
+      type: CLUB_TYPES[Math.floor(Math.random()*CLUB_TYPES.length)] as ClubType,
+      tag: Math.random() > 0.7 ? 'Nuevo' : undefined,
+    }));
+  }
+
+  private generateEditorialClubs(editoriales: EditorialDTO[]): Club[] {
+    return editoriales.slice(0, 8).map(e => ({
+      id: `editorial-${e.id_editoria}`,
+      title: `Editorial ${e.Nombre}`,
+      description: `Club para lectores de ${e.Nombre}`,
+      image: '/assets/clubs/literatura.jpg',
+      members: Math.floor(Math.random() * 200) + 50,
+      category: 'literatura',
+      type: CLUB_TYPES[Math.floor(Math.random()*CLUB_TYPES.length)] as ClubType,
+      tag: Math.random() > 0.5 ? 'Popular' : undefined,
+    }));
+  }
+
   onSearch(): void {
-    console.log('Buscando:', this.searchQuery());
+    // filtrado automático
   }
 
   onAdvancedSearch(): void {
@@ -216,12 +189,12 @@ export class Community {
     this.selectedMemberRange.set('');
   }
 
-  onClubClick(clubId: number): void {
+  onClubClick(clubId: string): void {
     console.log('Ver detalles del club:', clubId);
-    alert(`Ver detalles del club #${clubId}`);
+    alert(`Ver detalles del club ${clubId}`);
   }
 
-  onJoinClub(clubId: number, event: Event): void {
+  onJoinClub(clubId: string, event: Event): void {
     event.stopPropagation();
 
     if (!this.auth.isLoggedIn()) {
@@ -240,7 +213,7 @@ export class Community {
     this.joinedClubs.set(joined);
   }
 
-  isJoined(clubId: number): boolean {
+  isJoined(clubId: string): boolean {
     return this.joinedClubs().has(clubId);
   }
 

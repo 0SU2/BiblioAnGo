@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { StoriesService } from '../../core/services/stories';
 
 interface Character {
   name: string;
@@ -69,7 +70,7 @@ export class CreateStory {
     { value: 'mensual', label: 'Mensual' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private stories: StoriesService) {}
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -125,42 +126,23 @@ export class CreateStory {
     }
   }
 
-  onSave(): void {
+  async onSave(): Promise<void> {
     if (!this.title().trim()) {
       alert('Por favor, ingresa un título para tu historia');
       return;
     }
 
-    if (!this.category()) {
-      alert('Por favor, selecciona una categoría');
-      return;
+    try {
+      const created = await this.stories.createStory({
+        titulo: this.title().trim(),
+        cover: this.coverImage(),
+        estatus: this.status().includes('completa') ? 'published' : 'draft'
+      });
+      // Redirigir al editor para crear el primer capítulo
+      this.router.navigate(['/create-chapter', String(created.id)]);
+    } catch (e) {
+      console.error('Error creando historia', e);
+      alert('No se pudo crear la historia');
     }
-
-    if (!this.ageRating()) {
-      alert('Por favor, selecciona una clasificación de edad');
-      return;
-    }
-
-    if (!this.description().trim()) {
-      alert('Por favor, ingresa una descripción');
-      return;
-    }
-
-    console.log('Guardando historia completa:', {
-      title: this.title(),
-      category: this.category(),
-      ageRating: this.ageRating(),
-      status: this.status(),
-      language: this.language(),
-      description: this.description(),
-      tags: this.tags(),
-      characters: this.characters(),
-      frequency: this.frequency(),
-      coverImage: this.coverImage()
-    });
-
-    alert('¡Historia guardada exitosamente!');
-    // Redirigir al editor para crear el primer capítulo
-    this.router.navigate(['/create-chapter', 'new']);
   }
 }
